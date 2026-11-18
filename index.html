@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SIMASJID - Sistem Keuangan & Manajemen DKM</title>
+  <meta name="theme-color" content="#6347EB" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+  <!-- PWA Manifest via Data URI -->
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22SIMASJID%20-%20Keuangan%20DKM%22%2C%22short_name%22%3A%22SIMASJID%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F7F8FA%22%2C%22theme_color%22%3A%22%236347EB%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Crect%20width%3D%27100%27%20height%3D%27100%27%20rx%3D%2724%27%20fill%3D%27%236347EB%27%2F%3E%3Cpath%20d%3D%27M50%2020C36%2020%2028%2032%2028%2044h44c0-12-8-24-22-24zm-26%2028v32h52V48H24zm20%2012h12v20H44V60z%27%20fill%3D%27%23fff%27%2F%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#F2EFFE',
+              100: '#E5DFFD',
+              500: '#6347EB',
+              600: '#5338D8',
+              700: '#4329C2',
+            },
+            canvas: '#F7F8FA',
+          },
+          boxShadow: {
+            'soft': '0 2px 14px rgba(17, 24, 39, 0.03)',
+            'card': '0 4px 20px rgba(99, 71, 235, 0.06)',
+            'brand': '0 10px 25px -5px rgba(99, 71, 235, 0.35)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- SheetJS (Excel Export) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- html2pdf.js (PDF Export) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    /* Reset agar Full-Page menutup elemen bawaan Blogger / CMS */
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: #F7F8FA !important;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #111827;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #app-root {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      background-color: #F7F8FA;
+      z-index: 9990;
+    }
+
+    /* Angka sejajar */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Indikator vertikal aktif di sidebar seperti referensi UI */
+    .nav-item-desktop {
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .nav-item-desktop.active {
+      color: #111827;
+      font-weight: 700;
+      background-color: #F8F7FF;
+    }
+    .nav-item-desktop.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 18%;
+      height: 64%;
+      width: 4px;
+      border-radius: 0 6px 6px 0;
+      background-color: #6347EB;
+    }
+    .nav-item-desktop.active svg {
+      color: #6347EB;
+    }
+
+    /* Glassmorphism untuk Floating Mobile Bottom Nav & Modal */
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(229, 231, 235, 0.8);
+    }
+
+    .glass-modal {
+      background: rgba(17, 24, 39, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D1D5DB;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9CA3AF;
+    }
+
+    /* Print styling khusus saat cetak langsung */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-report-area, #printable-report-area * {
+        visibility: visible;
+      }
+      #printable-report-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app-root"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-4 right-4 z-[10050] flex flex-col gap-2 max-w-sm w-[calc(100%-2rem)] pointer-events-none"></div>
+
+  <!-- Modal Container -->
+  <div id="modal-container" class="fixed inset-0 z-[10020] hidden items-center justify-center p-4 glass-modal overflow-y-auto"></div>
+
+  <!-- ======================================================================= -->
+  <!-- MODULE SCRIPT: FIREBASE + STATE MANAGEMENT + UI RENDERER                -->
+  <!-- ======================================================================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, writeBatch
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // =========================================================================
+    // 1. KONFIGURASI APLIKASI & SAKLAR DEPLOYMENT
+    // =========================================================================
+    const IS_PREVIEW = false; // Ubah menjadi false SAAT DEPLOY / PUBLISH agar terhubung murni ke Firebase tanpa data dummy
+
+    // PASTE FIREBASE CONFIG ANDA DI SINI
+    const firebaseConfig = {
+  apiKey: "AIzaSyAyJX7vxWiZ02icKXTV2tBHndOpgp7wc4Q",
+  authDomain: "e-masjid-al-barkah.firebaseapp.com",
+  projectId: "e-masjid-al-barkah",
+  storageBucket: "e-masjid-al-barkah.firebasestorage.app",
+  messagingSenderId: "118224909066",
+  appId: "1:118224909066:web:9bdcaa3d2de5edd5a080f3"
+    };
+
+    // =========================================================================
+    // 2. INISIALISASI PWA SERVICE WORKER (BLOB DINAMIS 1 FILE)
+    // =========================================================================
+    if ('serviceWorker' in navigator && location.protocol === 'https:') {
+      const swCode = `
+        const CACHE_NAME = 'simasjid-v1';
+        self.addEventListener('install', (e) => self.skipWaiting());
+        self.addEventListener('activate', (e) => e.waitUntil(clients.claim()));
+        self.addEventListener('fetch', (e) => {
+          e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+        });
+      `;
+      try {
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).catch(() => {});
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 3. INISIALISASI FIREBASE (HANYA AKTIF JIKA IS_PREVIEW === false)
+    // =========================================================================
+    let fbApp = null;
+    let fbAuth = null;
+    let fbDb = null;
+
+    if (!IS_PREVIEW) {
+      try {
+        fbApp = initializeApp(firebaseConfig);
+        fbAuth = getAuth(fbApp);
+        fbDb = getFirestore(fbApp);
+      } catch (err) {
+        console.error('Firebase Init Error:', err);
+      }
+    }
+
+    // =========================================================================
+    // 4. STATE UTAMA APLIKASI
+    // =========================================================================
+    const todayStr = new Date().toISOString().split('T')[0];
+    const firstDayMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+
+    const state = {
+      currentUser: null,
+      activeTab: 'dashboard',
+      loading: false,
+      searchQuery: '',
+      keuanganFilterType: 'semua',
+      keuanganFilterCategory: 'semua',
+      laporanMode: 'rentang',
+      laporanStartDate: firstDayMonth,
+      laporanEndDate: todayStr,
+      settings: {
+        nama_masjid: 'Masjid Agung Al-Ikhlas',
+        alamat_masjid: 'Jl. Raya Merdeka No. 45, Pusat Kota',
+        kota_masjid: 'Jakarta',
+        nama_ketua: 'H. Ahmad Fauzi, M.Ag',
+        nama_sekretaris: 'Ust. Muhammad Ridwan',
+        nama_bendahara: 'Ir. Budi Santoso'
+      },
+      users: [],
+      categories: [],
+      transactions: []
+    };
+
+    // Data Dummy Minimalis (HANYA dimuat saat IS_PREVIEW === true)
+    if (IS_PREVIEW) {
+      state.users = [
+        {
+          id: 'usr-1',
+          nama: 'Ir. Budi Santoso',
+          jabatan: 'Bendahara Utama DKM',
+          alamat: 'Perumahan Griya Asri Blok B2 No. 10',
+          username: 'bendahara',
+          password: '123',
+          role: 'bendahara',
+          foto_profil: ''
+        },
+        {
+          id: 'usr-2',
+          nama: 'H. Ahmad Fauzi, M.Ag',
+          jabatan: 'Ketua Umum DKM',
+          alamat: 'Jl. Melati Indah No. 12',
+          username: 'ketua',
+          password: '123',
+          role: 'ketua_dkm',
+          foto_profil: ''
+        }
+      ];
+
+      state.categories = [
+        { id: 'cat-1', nama_kategori: 'Infaq & Kotak Amal Jumat', jenis: 'pemasukan', warna_badge: 'emerald' },
+        { id: 'cat-2', nama_kategori: 'Operasional Listrik, Air & Kebersihan', jenis: 'pengeluaran', warna_badge: 'rose' }
+      ];
+
+      state.transactions = [
+        {
+          id: 'trx-1',
+          tanggal: todayStr,
+          jenis: 'pemasukan',
+          kategori_id: 'cat-1',
+          kategori_nama: 'Infaq & Kotak Amal Jumat',
+          nominal: 4850000,
+          keterangan: 'Penerimaan kotak amal shalat Jumat pekan ini',
+          bukti_foto: '',
+          dibuat_oleh: 'Ir. Budi Santoso',
+          role_pembuat: 'bendahara'
+        },
+        {
+          id: 'trx-2',
+          tanggal: todayStr,
+          jenis: 'pengeluaran',
+          kategori_id: 'cat-2',
+          kategori_nama: 'Operasional Listrik, Air & Kebersihan',
+          nominal: 1250000,
+          keterangan: 'Pembayaran token listrik utama & perawatan AC masjid',
+          bukti_foto: '',
+          dibuat_oleh: 'Ir. Budi Santoso',
+          role_pembuat: 'bendahara'
+        }
+      ];
+    }
+
+    let unsubscribers = [];
+
+    // =========================================================================
+    // 5. HELPER FORMATTING, NOTIFIKASI, & HAK AKSES ROLE
+    // =========================================================================
+    function formatRupiah(num) {
+      const val = Number(num) || 0;
+      return 'Rp ' + val.toLocaleString('id-ID');
+    }
+
+    function formatTanggal(isoDate) {
+      if (!isoDate) return '-';
+      const parts = isoDate.split('-');
+      if (parts.length !== 3) return isoDate;
+      const bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      return `${parts[2]} ${bulan[parseInt(parts[1], 10) - 1] || parts[1]} ${parts[0]}`;
+    }
+
+    function getRoleLabel(role) {
+      const map = {
+        superadmin: 'Admin Utama',
+        bendahara: 'Bendahara DKM',
+        ketua_dkm: 'Ketua DKM',
+        sekretaris: 'Sekretaris DKM'
+      };
+      return map[role] || role;
+    }
+
+    function getPermissions(role) {
+      return {
+        canManageFinance: role === 'superadmin' || role === 'bendahara',
+        canManageUsers: role === 'superadmin' || role === 'sekretaris' || role === 'ketua_dkm',
+        canEditMasjidProfile: role === 'superadmin' || role === 'sekretaris' || role === 'ketua_dkm',
+        canAccessSystemReset: role === 'superadmin'
+      };
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const colors = {
+        success: 'bg-gray-900 text-white border-emerald-500',
+        error: 'bg-rose-600 text-white border-rose-400',
+        info: 'bg-brand-600 text-white border-brand-400'
+      };
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-xl border-l-4 text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 transition-all duration-300 ${colors[type] || colors.success}`;
+      el.innerHTML = `<span>${message}</span>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-8px)';
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
+
+    function openModal(htmlContent, maxWidthClass = 'max-w-lg') {
+      const modal = document.getElementById('modal-container');
+      if (!modal) return;
+      modal.innerHTML = `
+        <div class="bg-white w-full ${maxWidthClass} rounded-3xl shadow-2xl border border-gray-100 overflow-hidden my-auto animate-fade-in">
+          ${htmlContent}
+        </div>
+      `;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modal-container');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      modal.innerHTML = '';
+    }
+
+    // Kompresi gambar kamera/galeri agar ringan di Firestore (< 1MB)
+    function compressImageFile(file, maxDim = 800, quality = 0.72) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width;
+            let h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // =========================================================================
+    // 6. SINKRONISASI REAL-TIME FIRESTORE (HANYA SAAT IS_PREVIEW === false)
+    // =========================================================================
+    function stopRealtimeListeners() {
+      unsubscribers.forEach(unsub => { try { unsub(); } catch (e) {} });
+      unsubscribers = [];
+    }
+
+    async function startRealtimeSync() {
+      if (IS_PREVIEW || !fbDb) return;
+      stopRealtimeListeners();
+
+      // 1. Settings Masjid
+      const unsubSettings = onSnapshot(doc(fbDb, 'masjid_settings', 'profil_utama'), (snap) => {
+        if (snap.exists()) {
+          state.settings = { ...state.settings, ...snap.data() };
+          renderApp();
+        }
+      }, (err) => console.error('Settings sync error:', err));
+
+      // 2. Pengurus DKM
+      const unsubUsers = onSnapshot(collection(fbDb, 'masjid_users'), (snap) => {
+        state.users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderApp();
+      }, (err) => console.error('Users sync error:', err));
+
+      // 3. Kategori Keuangan
+      const unsubCats = onSnapshot(collection(fbDb, 'masjid_categories'), (snap) => {
+        state.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderApp();
+      }, (err) => console.error('Categories sync error:', err));
+
+      // 4. Transaksi Keuangan
+      const unsubTrx = onSnapshot(collection(fbDb, 'masjid_transactions'), (snap) => {
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        list.sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+        state.transactions = list;
+        renderApp();
+      }, (err) => console.error('Transactions sync error:', err));
+
+      unsubscribers.push(unsubSettings, unsubUsers, unsubCats, unsubTrx);
+    }
+
+    // =========================================================================
+    // 7. OPERASI CRUD DATA (DUAL-MODE: IN-MEMORY PREVIEW vs FIRESTORE LIVE)
+    // =========================================================================
+    async function saveTransaction(payload, editId = null) {
+      const data = {
+        ...payload,
+        dibuat_oleh: state.currentUser?.nama || 'Pengurus',
+        role_pembuat: state.currentUser?.role || 'bendahara',
+        updated_at: new Date().toISOString()
+      };
+
+      if (IS_PREVIEW) {
+        if (editId) {
+          const idx = state.transactions.findIndex(t => t.id === editId);
+          if (idx !== -1) state.transactions[idx] = { ...state.transactions[idx], ...data };
+          showToast('Transaksi berhasil diperbarui.');
+        } else {
+          state.transactions.unshift({ id: 'trx-' + Date.now(), ...data });
+          showToast('Transaksi baru berhasil dicatat.');
+        }
+        state.transactions.sort((a, b) => (b.tanggal || '').localeCompare(a.tanggal || ''));
+        closeModal();
+        renderApp();
+        return;
+      }
+
+      try {
+        if (editId) {
+          await updateDoc(doc(fbDb, 'masjid_transactions', editId), data);
+          showToast('Transaksi berhasil diperbarui di database.');
+        } else {
+          await addDoc(collection(fbDb, 'masjid_transactions'), data);
+          showToast('Transaksi baru tersimpan ke database.');
+        }
+        closeModal();
+      } catch (err) {
+        showToast('Gagal menyimpan transaksi: ' + err.message, 'error');
+      }
+    }
+
+    async function deleteTransaction(id) {
+      if (IS_PREVIEW) {
+        state.transactions = state.transactions.filter(t => t.id !== id);
+        showToast('Transaksi dihapus.');
+        closeModal();
+        renderApp();
+        return;
+      }
+      try {
+        await deleteDoc(doc(fbDb, 'masjid_transactions', id));
+        showToast('Transaksi berhasil dihapus.');
+        closeModal();
+      } catch (err) {
+        showToast('Gagal menghapus transaksi: ' + err.message, 'error');
+      }
+    }
+
+    async function saveCategory(payload, editId = null) {
+      if (IS_PREVIEW) {
+        if (editId) {
+          const idx = state.categories.findIndex(c => c.id === editId);
+          if (idx !== -1) state.categories[idx] = { ...state.categories[idx], ...payload };
+          showToast('Kategori diperbarui.');
+        } else {
+          state.categories.push({ id: 'cat-' + Date.now(), ...payload });
+          showToast('Kategori baru ditambahkan.');
+        }
+        renderModalKategori();
+        renderApp();
+        return;
+      }
+      try {
+        if (editId) {
+          await updateDoc(doc(fbDb, 'masjid_categories', editId), payload);
+          showToast('Kategori berhasil diperbarui.');
+        } else {
+          await addDoc(collection(fbDb, 'masjid_categories'), payload);
+          showToast('Kategori baru berhasil ditambahkan.');
+        }
+        renderModalKategori();
+      } catch (err) {
+        showToast('Gagal menyimpan kategori: ' + err.message, 'error');
+      }
+    }
+
+    async function deleteCategory(id) {
+      if (IS_PREVIEW) {
+        state.categories = state.categories.filter(c => c.id !== id);
+        showToast('Kategori dihapus.');
+        renderModalKategori();
+        renderApp();
+        return;
+      }
+      try {
+        await deleteDoc(doc(fbDb, 'masjid_categories', id));
+        showToast('Kategori berhasil dihapus.');
+        renderModalKategori();
+      } catch (err) {
+        showToast('Gagal menghapus kategori: ' + err.message, 'error');
+      }
+    }
+
+    async function saveUser(payload, editId = null) {
+      if (IS_PREVIEW) {
+        if (editId) {
+          const idx = state.users.findIndex(u => u.id === editId);
+          if (idx !== -1) state.users[idx] = { ...state.users[idx], ...payload };
+          showToast('Data pengurus diperbarui.');
+        } else {
+          state.users.push({ id: 'usr-' + Date.now(), created_at: new Date().toISOString(), ...payload });
+          showToast('Pengurus DKM baru terdaftar.');
+        }
+        closeModal();
+        renderApp();
+        return;
+      }
+      try {
+        if (editId) {
+          await updateDoc(doc(fbDb, 'masjid_users', editId), payload);
+          showToast('Data pengurus berhasil diperbarui.');
+        } else {
+          await addDoc(collection(fbDb, 'masjid_users'), { ...payload, created_at: new Date().toISOString() });
+          showToast('Pengurus baru berhasil didaftarkan.');
+        }
+        closeModal();
+      } catch (err) {
+        showToast('Gagal menyimpan data pengurus: ' + err.message, 'error');
+      }
+    }
+
+    async function deleteUser(id) {
+      if (IS_PREVIEW) {
+        state.users = state.users.filter(u => u.id !== id);
+        showToast('Akun pengurus dihapus.');
+        closeModal();
+        renderApp();
+        return;
+      }
+      try {
+        await deleteDoc(doc(fbDb, 'masjid_users', id));
+        showToast('Akun pengurus berhasil dihapus.');
+        closeModal();
+      } catch (err) {
+        showToast('Gagal menghapus pengurus: ' + err.message, 'error');
+      }
+    }
+
+    async function saveSettings(newSettings) {
+      state.settings = { ...state.settings, ...newSettings };
+      if (IS_PREVIEW) {
+        showToast('Pengaturan identitas masjid disimpan.');
+        renderApp();
+        return;
+      }
+      try {
+        await setDoc(doc(fbDb, 'masjid_settings', 'profil_utama'), state.settings, { merge: true });
+        showToast('Pengaturan masjid tersimpan di database.');
+        renderApp();
+      } catch (err) {
+        showToast('Gagal menyimpan pengaturan: ' + err.message, 'error');
+      }
+    }
+
+    // =========================================================================
+    // 8. OPERASI AUTENTIKASI HYBRID (SATU FORM UNTUK SEMUA ROLE)
+    // =========================================================================
+    async function handleUnifiedLogin(identifier, password) {
+      const cleanId = (identifier || '').trim();
+      if (!cleanId || !password) {
+        showToast('Email / Username dan password wajib diisi.', 'error');
+        return;
+      }
+
+      const isEmailLogin = cleanId.includes('@');
+
+      if (IS_PREVIEW) {
+        if (isEmailLogin) {
+          if (cleanId.toLowerCase() === 'admin@masjid.id' && password === 'admin123') {
+            state.currentUser = {
+              id: 'superadmin-preview',
+              nama: 'Administrator Utama',
+              jabatan: 'Super Admin Sistem',
+              alamat: state.settings.alamat_masjid,
+              username: 'admin@masjid.id',
+              role: 'superadmin',
+              foto_profil: ''
+            };
+            showToast('Berhasil masuk sebagai Admin Utama (Mode Preview)');
+            renderApp();
+          } else {
+            showToast('Email atau password Admin demo tidak cocok.', 'error');
+          }
+        } else {
+          const found = state.users.find(
+            u => u.username.toLowerCase() === cleanId.toLowerCase() && u.password === password
+          );
+          if (found) {
+            state.currentUser = { ...found };
+            showToast(`Selamat datang, ${found.nama} (${getRoleLabel(found.role)})`);
+            renderApp();
+          } else {
+            showToast('Username atau password pengurus salah.', 'error');
+          }
+        }
+        return;
+      }
+
+      try {
+        state.loading = true;
+        renderApp();
+
+        if (isEmailLogin) {
+          const cred = await signInWithEmailAndPassword(fbAuth, cleanId, password);
+          state.currentUser = {
+            id: cred.user.uid,
+            nama: 'Administrator Utama',
+            jabatan: 'Super Admin DKM',
+            alamat: state.settings.alamat_masjid,
+            username: cred.user.email,
+            role: 'superadmin',
+            foto_profil: ''
+          };
+          await startRealtimeSync();
+          showToast('Login Admin Utama berhasil terhubung ke Firebase.');
+        } else {
+          const snap = await getDocs(collection(fbDb, 'masjid_users'));
+          const allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const found = allUsers.find(
+            u => (u.username || '').toLowerCase() === cleanId.toLowerCase() && u.password === password
+          );
+
+          if (found) {
+            state.currentUser = { ...found };
+            await startRealtimeSync();
+            showToast(`Selamat datang, ${found.nama} (${getRoleLabel(found.role)})`);
+          } else {
+            showToast('Akun tidak ditemukan atau password salah.', 'error');
+          }
+        }
+      } catch (err) {
+        showToast('Login gagal: Periksa kembali kredensial akun Anda.', 'error');
+      } finally {
+        state.loading = false;
+        renderApp();
+      }
+    }
+
+    async function handleLogout() {
+      if (!IS_PREVIEW && fbAuth && fbAuth.currentUser) {
+        try { await signOut(fbAuth); } catch (e) {}
+      }
+      stopRealtimeListeners();
+      state.currentUser = null;
+      state.activeTab = 'dashboard';
+      showToast('Anda telah keluar dari sistem.', 'info');
+      renderApp();
+    }
+
+    // =========================================================================
+    // 9. KALKULASI STATISTIK DASHBOARD & FILTER LAPORAN
+    // =========================================================================
+    function getDashboardStats() {
+      let totalMasuk = 0;
+      let totalKeluar = 0;
+      let bulanIniMasuk = 0;
+      let bulanIniKeluar = 0;
+      const currentMonthPrefix = new Date().toISOString().slice(0, 7);
+
+      state.transactions.forEach(t => {
+        const nom = Number(t.nominal) || 0;
+        const isCurrentMonth = (t.tanggal || '').startsWith(currentMonthPrefix);
+        if (t.jenis === 'pemasukan') {
+          totalMasuk += nom;
+          if (isCurrentMonth) bulanIniMasuk += nom;
+        } else {
+          totalKeluar += nom;
+          if (isCurrentMonth) bulanIniKeluar += nom;
+        }
+      });
+
+      const saldoKas = totalMasuk - totalKeluar;
+      const totalArus = totalMasuk + totalKeluar;
+      const persenMasuk = totalArus > 0 ? Math.round((totalMasuk / totalArus) * 100) : 100;
+
+      // Aktivitas 7 hari terakhir untuk grafik kapsul
+      const days = [];
+      const dayLabels = ['M', 'S', 'S', 'R', 'K', 'J', 'S'];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const iso = d.toISOString().split('T')[0];
+        const dayTotal = state.transactions
+          .filter(t => t.tanggal === iso)
+          .reduce((acc, cur) => acc + (Number(cur.nominal) || 0), 0);
+        days.push({
+          date: iso,
+          label: dayLabels[d.getDay()],
+          total: dayTotal
+        });
+      }
+      const maxDayTotal = Math.max(...days.map(d => d.total), 1);
+
+      return {
+        saldoKas,
+        totalMasuk,
+        totalKeluar,
+        bulanIniMasuk,
+        bulanIniKeluar,
+        totalCount: state.transactions.length,
+        persenMasuk,
+        days,
+        maxDayTotal
+      };
+    }
+
+    function getFilteredReportTransactions() {
+      const sorted = [...state.transactions].sort((a, b) => (a.tanggal || '').localeCompare(b.tanggal || ''));
+      if (state.laporanMode === 'keseluruhan') return sorted;
+      return sorted.filter(t => {
+        if (state.laporanStartDate && t.tanggal < state.laporanStartDate) return false;
+        if (state.laporanEndDate && t.tanggal > state.laporanEndDate) return false;
+        return true;
+      });
+    }
+
+    function getSignatureNames() {
+      const ketuaUser = state.users.find(u => u.role === 'ketua_dkm');
+      const sekretarisUser = state.users.find(u => u.role === 'sekretaris');
+      const bendaharaUser = state.users.find(u => u.role === 'bendahara');
+
+      return {
+        ketua: (state.settings.nama_ketua || '').trim() || (ketuaUser ? ketuaUser.nama : ''),
+        sekretaris: (state.settings.nama_sekretaris || '').trim() || (sekretarisUser ? sekretarisUser.nama : ''),
+        bendahara: (state.settings.nama_bendahara || '').trim() || (bendaharaUser ? bendaharaUser.nama : '')
+      };
+    }
+
+    // =========================================================================
+    // 10. EKSPOR EXCEL & PDF RESMI
+    // =========================================================================
+    function exportReportToExcel() {
+      if (typeof XLSX === 'undefined') {
+        showToast('Library Excel belum termuat.', 'error');
+        return;
+      }
+      const list = getFilteredReportTransactions();
+      let saldo = 0;
+      const rows = list.map((t, idx) => {
+        const masuk = t.jenis === 'pemasukan' ? Number(t.nominal) : 0;
+        const keluar = t.jenis === 'pengeluaran' ? Number(t.nominal) : 0;
+        saldo += (masuk - keluar);
+        return {
+          'No': idx + 1,
+          'Tanggal': t.tanggal,
+          'Kategori': t.kategori_nama,
+          'Uraian Transaksi': t.keterangan,
+          'Pemasukan (Rp)': masuk,
+          'Pengeluaran (Rp)': keluar,
+          'Saldo Berjalan (Rp)': saldo,
+          'Dicatat Oleh': t.dibuat_oleh || '-'
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Laporan Keuangan Masjid');
+      XLSX.writeFile(wb, `Laporan_Keuangan_${state.settings.nama_masjid.replace(/\s+/g, '_')}.xlsx`);
+      showToast('File Excel laporan berhasil diunduh.');
+    }
+
+    function exportReportToPDF() {
+      const el = document.getElementById('printable-report-area');
+      if (!el) return;
+      if (typeof html2pdf === 'undefined') {
+        window.print();
+        return;
+      }
+      showToast('Menyiapkan dokumen PDF resmi...', 'info');
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `Laporan_Resmi_${state.settings.nama_masjid.replace(/\s+/g, '_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(el).save().then(() => {
+        showToast('Dokumen PDF berhasil diunduh.');
+      });
+    }
+
+    // =========================================================================
+    // 11. BACKUP, RESTORE, & RESET TOTAL DATABASE
+    // =========================================================================
+    function handleBackupJSON() {
+      const payload = {
+        app: 'SIMASJID',
+        exported_at: new Date().toISOString(),
+        settings: state.settings,
+        users: state.users,
+        categories: state.categories,
+        transactions: state.transactions
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Backup_SIMASJID_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Backup JSON berhasil diunduh.');
+    }
+
+    async function handleRestoreJSON(file) {
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!data || !Array.isArray(data.transactions)) {
+          showToast('Format file backup tidak valid.', 'error');
+          return;
+        }
+
+        if (IS_PREVIEW) {
+          if (data.settings) state.settings = { ...state.settings, ...data.settings };
+          if (Array.isArray(data.users)) state.users = data.users;
+          if (Array.isArray(data.categories)) state.categories = data.categories;
+          if (Array.isArray(data.transactions)) state.transactions = data.transactions;
+          showToast('Data berhasil dipulihkan (Mode Preview).');
+          renderApp();
+          return;
+        }
+
+        showToast('Memulihkan data ke Firebase Firestore...', 'info');
+        if (data.settings) {
+          await setDoc(doc(fbDb, 'masjid_settings', 'profil_utama'), data.settings, { merge: true });
+        }
+        const batch = writeBatch(fbDb);
+        (data.users || []).forEach(u => {
+          const ref = u.id ? doc(fbDb, 'masjid_users', u.id) : doc(collection(fbDb, 'masjid_users'));
+          batch.set(ref, u);
+        });
+        (data.categories || []).forEach(c => {
+          const ref = c.id ? doc(fbDb, 'masjid_categories', c.id) : doc(collection(fbDb, 'masjid_categories'));
+          batch.set(ref, c);
+        });
+        (data.transactions || []).forEach(t => {
+          const ref = t.id ? doc(fbDb, 'masjid_transactions', t.id) : doc(collection(fbDb, 'masjid_transactions'));
+          batch.set(ref, t);
+        });
+        await batch.commit();
+        showToast('Seluruh data backup berhasil dipulihkan ke database.');
+      } catch (err) {
+        showToast('Gagal memulihkan file backup: ' + err.message, 'error');
+      }
+    }
+
+    async function handleResetAllData() {
+      if (IS_PREVIEW) {
+        state.transactions = [];
+        state.categories = [];
+        state.users = [];
+        closeModal();
+        showToast('Seluruh data berhasil dikosongkan.');
+        renderApp();
+        return;
+      }
+      try {
+        showToast('Menghapus seluruh koleksi data di database...', 'info');
+        const cols = ['masjid_transactions', 'masjid_categories', 'masjid_users'];
+        for (const colName of cols) {
+          const snap = await getDocs(collection(fbDb, colName));
+          const batch = writeBatch(fbDb);
+          snap.docs.forEach(d => batch.delete(d.ref));
+          await batch.commit();
+        }
+        closeModal();
+        showToast('Reset selesai. Seluruh data database telah dikosongkan.');
+      } catch (err) {
+        showToast('Gagal melakukan reset data: ' + err.message, 'error');
+      }
+    }
+
+    // =========================================================================
+    // 13. RENDER HALAMAN LOGIN (SATU LOGIN UNTUK SEMUA ROLE + HIDE/UNHIDE)
+    // =========================================================================
+    function renderLoginView() {
+      return `
+        <div class="min-h-screen bg-canvas flex flex-col justify-center items-center p-4 sm:p-6">
+          ${IS_PREVIEW ? `
+            <div class="w-full max-w-md mb-4 bg-brand-50 border border-brand-100 rounded-2xl px-4 py-3 flex items-start gap-3">
+              <i data-lucide="sparkles" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i>
+              <div class="text-xs text-gray-700 leading-relaxed">
+                <span class="font-bold text-brand-600 block">Mode Uji Coba (IS_PREVIEW = true)</span>
+                Masuk dari 1 form di bawah untuk semua role:<br/>
+                • <b>Admin Utama:</b> <code class="bg-white px-1.5 py-0.5 rounded border">admin@masjid.id</code> / <code class="bg-white px-1.5 py-0.5 rounded border">admin123</code><br/>
+                • <b>Bendahara:</b> <code class="bg-white px-1.5 py-0.5 rounded border">bendahara</code> / <code class="bg-white px-1.5 py-0.5 rounded border">123</code><br/>
+                • <b>Ketua DKM:</b> <code class="bg-white px-1.5 py-0.5 rounded border">ketua</code> / <code class="bg-white px-1.5 py-0.5 rounded border">123</code>
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="w-full max-w-md bg-white rounded-3xl shadow-soft border border-gray-100 p-6 sm:p-8">
+            <!-- Brand Header -->
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-11 h-11 rounded-2xl bg-brand-500 text-white flex items-center justify-center shadow-brand">
+                <i data-lucide="landmark" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h1 class="text-xl font-extrabold tracking-tight text-gray-900">SIMASJID</h1>
+                <p class="text-xs text-gray-500 font-medium">Sistem Keuangan & Administrasi DKM</p>
+              </div>
+            </div>
+
+            <div class="mb-5">
+              <h2 class="text-base font-extrabold text-gray-900">Masuk ke Sistem</h2>
+              <p class="text-xs text-gray-500 mt-0.5">Gunakan Email Admin atau Username Pengurus (Bendahara, Ketua DKM, Sekretaris).</p>
+            </div>
+
+            <!-- Form Login Terpadu (Semua Role) -->
+            <form id="form-unified-login" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1.5">Email Admin / Username Pengurus</label>
+                <div class="relative">
+                  <i data-lucide="user-check" class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                  <input type="text" id="input-login-identifier" placeholder="Masukkan email atau username..." required
+                    class="w-full pl-10 pr-4 py-3 bg-canvas border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-brand-500 focus:bg-white transition-all" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1.5">Kata Sandi</label>
+                <div class="relative">
+                  <i data-lucide="lock" class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                  <input type="password" id="input-login-password" placeholder="••••••••" required
+                    class="w-full pl-10 pr-11 py-3 bg-canvas border border-gray-200 rounded-2xl text-sm focus:outline-none focus:border-brand-500 focus:bg-white transition-all" />
+                  <button type="button" onclick="window.appActions.togglePasswordVisibility('input-login-password', this)"
+                    title="Tampilkan / Sembunyikan Password"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-xl text-gray-400 hover:text-brand-600 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+              <button type="submit" ${state.loading ? 'disabled' : ''}
+                class="w-full py-3.5 px-5 bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm rounded-full shadow-brand transition-all flex items-center justify-center gap-2 mt-2">
+                <span>${state.loading ? 'Memverifikasi Akun...' : 'Masuk Sekarang'}</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 14. RENDER KONTEN MASING-MASING MENU (BENTO GRID STYLE)
+    // =========================================================================
+    function renderDashboardTab() {
+      const stats = getDashboardStats();
+      const perms = getPermissions(state.currentUser.role);
+      const recentTrx = state.transactions.slice(0, 5);
+
+      return `
+        <!-- Header Halaman -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Dashboard Keuangan</h1>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">Ringkasan kas, arus dana, dan aktivitas pengurus ${state.settings.nama_masjid}.</p>
+          </div>
+          <div class="flex items-center gap-2.5">
+            ${perms.canManageFinance ? `
+              <button type="button" onclick="window.appActions.openModalTransaksi()"
+                class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold rounded-full shadow-brand transition-all flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Catat Transaksi</span>
+              </button>
+            ` : ''}
+            <button type="button" onclick="window.appActions.switchTab('laporan')"
+              class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 text-xs sm:text-sm font-semibold rounded-full transition-all">
+              Lihat Laporan
+            </button>
+          </div>
+        </div>
+
+        <!-- Baris 1: 4 Kartu KPI Bento (Kartu 1 Highlight Ungu-Indigo sesuai Referensi UI) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+          <!-- Kartu 1: Total Saldo Kas (Highlight Card) -->
+          <div class="bg-gradient-to-br from-brand-500 to-brand-700 text-white rounded-3xl p-5 sm:p-6 shadow-brand flex flex-col justify-between relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs sm:text-sm font-semibold text-white/90">Total Saldo Kas Masjid</span>
+              <button type="button" onclick="window.appActions.switchTab('keuangan')"
+                class="w-8 h-8 rounded-full bg-white text-gray-900 flex items-center justify-center hover:scale-105 transition-transform">
+                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div class="text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums mb-3">
+              ${formatRupiah(stats.saldoKas)}
+            </div>
+            <div class="flex items-center gap-2 text-xs text-white/85">
+              <span class="px-2 py-0.5 rounded-md bg-white/20 font-semibold">Aktif</span>
+              <span>Saldo bersih kas tersedia</span>
+            </div>
+          </div>
+
+          <!-- Kartu 2: Pemasukan Bulan Ini -->
+          <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-soft flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs sm:text-sm font-semibold text-gray-700">Pemasukan Bulan Ini</span>
+              <div class="w-8 h-8 rounded-full border border-gray-200 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-gray-900 tabular-nums mb-3">
+              ${formatRupiah(stats.bulanIniMasuk)}
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold">
+              <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+              <span>Total masuk: ${formatRupiah(stats.totalMasuk)}</span>
+            </div>
+          </div>
+
+          <!-- Kartu 3: Pengeluaran Bulan Ini -->
+          <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-soft flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs sm:text-sm font-semibold text-gray-700">Pengeluaran Bulan Ini</span>
+              <div class="w-8 h-8 rounded-full border border-gray-200 text-rose-600 flex items-center justify-center">
+                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-gray-900 tabular-nums mb-3">
+              ${formatRupiah(stats.bulanIniKeluar)}
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-rose-600 font-semibold">
+              <i data-lucide="trending-down" class="w-3.5 h-3.5"></i>
+              <span>Total keluar: ${formatRupiah(stats.totalKeluar)}</span>
+            </div>
+          </div>
+
+          <!-- Kartu 4: Total Bukti Transaksi -->
+          <div class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-soft flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs sm:text-sm font-semibold text-gray-700">Total Transaksi</span>
+              <div class="w-8 h-8 rounded-full border border-gray-200 text-brand-500 flex items-center justify-center">
+                <i data-lucide="receipt" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-gray-900 tabular-nums mb-3">
+              ${stats.totalCount} <span class="text-sm font-semibold text-gray-400">Catatan</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-brand-500 font-semibold">
+              <span>${state.categories.length} Kategori aktif terdaftar</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baris 2: Bento Grid Tengah (Grafik Kapsul 7 Hari + Rasio Arus Kas + Agenda/Ringkasan) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
+          <!-- Grafik Batang Kapsul (7 Hari Terakhir) -->
+          <div class="lg:col-span-6 bg-white rounded-3xl p-6 border border-gray-100 shadow-soft">
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <h3 class="text-base font-bold text-gray-900">Aktivitas Arus Kas (7 Hari)</h3>
+                <p class="text-xs text-gray-400">Volume transaksi harian masuk & keluar</p>
+              </div>
+              <span class="px-3 py-1 rounded-full bg-brand-50 text-brand-600 text-xs font-bold">Mingguan</span>
+            </div>
+            <div class="grid grid-cols-7 gap-2.5 sm:gap-4 items-end h-44 pt-4">
+              ${stats.days.map(day => {
+                const pct = day.total > 0 ? Math.max(Math.round((day.total / stats.maxDayTotal) * 100), 18) : 12;
+                const isActive = day.total > 0;
+                return `
+                  <div class="flex flex-col items-center gap-2 h-full justify-end group">
+                    <div class="w-full max-w-[38px] h-32 bg-canvas rounded-full p-1 flex items-end relative overflow-hidden border border-gray-100" title="${day.date}: ${formatRupiah(day.total)}">
+                      <div style="height: ${pct}%" class="w-full rounded-full transition-all duration-500 ${isActive ? 'bg-brand-500 group-hover:bg-brand-600' : 'bg-gray-200/70'} flex justify-center pt-1.5">
+                        ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-white"></span>' : ''}
+                      </div>
+                    </div>
+                    <span class="text-xs font-semibold ${isActive ? 'text-gray-800' : 'text-gray-400'}">${day.label}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Semi-Circle Gauge Rasio Pemasukan vs Pengeluaran -->
+          <div class="lg:col-span-6 bg-white rounded-3xl p-6 border border-gray-100 shadow-soft flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-bold text-gray-900">Rasio Kesehatan Kas</h3>
+                <p class="text-xs text-gray-400">Perbandingan total pemasukan terhadap total arus dana</p>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-center justify-center my-3">
+              <div class="relative w-52 h-28 overflow-hidden flex items-end justify-center">
+                <svg viewBox="0 0 200 110" class="w-full h-full">
+                  <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#E5E7EB" stroke-width="18" stroke-linecap="round" />
+                  <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#6347EB" stroke-width="18" stroke-linecap="round"
+                    stroke-dasharray="251.2" stroke-dashoffset="${251.2 - (251.2 * stats.persenMasuk) / 100}" />
+                </svg>
+                <div class="absolute bottom-1 text-center">
+                  <span class="text-3xl font-extrabold text-gray-900">${stats.persenMasuk}%</span>
+                  <span class="block text-[11px] font-semibold text-gray-400">Porsi Pemasukan</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-center gap-6 pt-2 border-t border-gray-100 text-xs font-semibold">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span>
+                <span class="text-gray-600">Pemasukan (${stats.persenMasuk}%)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
+                <span class="text-gray-600">Pengeluaran (${100 - stats.persenMasuk}%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baris 3: Struktur Pengurus DKM & Transaksi Terbaru -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <!-- Daftar Pengurus DKM -->
+          <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-gray-100 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-bold text-gray-900">Pengurus DKM Aktif</h3>
+              ${perms.canManageUsers ? `
+                <button type="button" onclick="window.appActions.switchTab('pengguna')"
+                  class="px-3 py-1.5 rounded-full border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-1">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i> Kelola
+                </button>
+              ` : ''}
+            </div>
+            ${state.users.length === 0 ? `
+              <div class="text-center py-8 text-xs text-gray-400">Belum ada data pengurus DKM yang ditambahkan.</div>
+            ` : `
+              <div class="space-y-3.5">
+                ${state.users.slice(0, 4).map(u => `
+                  <div class="flex items-center justify-between gap-3 p-2.5 rounded-2xl hover:bg-canvas transition-colors">
+                    <div class="flex items-center gap-3 min-w-0">
+                      ${u.foto_profil
+                        ? `<img src="${u.foto_profil}" class="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0" />`
+                        : `<div class="w-10 h-10 rounded-full bg-brand-100 text-brand-600 font-bold text-sm flex items-center justify-center shrink-0">${(u.nama || 'U').charAt(0).toUpperCase()}</div>`
+                      }
+                      <div class="min-w-0">
+                        <p class="text-sm font-bold text-gray-900 truncate">${u.nama}</p>
+                        <p class="text-xs text-gray-500 truncate">${u.jabatan}</p>
+                      </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-brand-50 text-brand-600 shrink-0">
+                      ${getRoleLabel(u.role)}
+                    </span>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+
+          <!-- Transaksi Terbaru -->
+          <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-gray-100 shadow-soft">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-bold text-gray-900">Transaksi Keuangan Terbaru</h3>
+              <button type="button" onclick="window.appActions.switchTab('keuangan')"
+                class="text-xs font-bold text-brand-500 hover:text-brand-700">
+                Semua Transaksi →
+              </button>
+            </div>
+            ${recentTrx.length === 0 ? `
+              <div class="text-center py-8 text-xs text-gray-400">Belum ada transaksi keuangan yang tercatat.</div>
+            ` : `
+              <div class="space-y-3">
+                ${recentTrx.map(t => {
+                  const isMasuk = t.jenis === 'pemasukan';
+                  return `
+                    <div class="flex items-center justify-between gap-3 p-3 rounded-2xl border border-gray-100 hover:border-brand-100 transition-all">
+                      <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-10 h-10 rounded-2xl ${isMasuk ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} flex items-center justify-center shrink-0">
+                          <i data-lucide="${isMasuk ? 'arrow-down-left' : 'arrow-up-right'}" class="w-5 h-5"></i>
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-sm font-bold text-gray-900 truncate">${t.keterangan}</p>
+                          <p class="text-xs text-gray-400 truncate">${formatTanggal(t.tanggal)} • ${t.kategori_nama}</p>
+                        </div>
+                      </div>
+                      <div class="text-right shrink-0">
+                        <p class="text-sm font-extrabold tabular-nums ${isMasuk ? 'text-emerald-600' : 'text-rose-600'}">
+                          ${isMasuk ? '+' : '-'} ${formatRupiah(t.nominal)}
+                        </p>
+                        ${t.bukti_foto ? `<span class="text-[10px] font-semibold text-brand-500 inline-flex items-center gap-1"><i data-lucide="image" class="w-3 h-3"></i> Ada Bukti</span>` : ''}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderKeuanganTab() {
+      const perms = getPermissions(state.currentUser.role);
+
+      // Filter transaksi berdasarkan tipe, kategori, dan searchQuery
+      const filtered = state.transactions.filter(t => {
+        if (state.keuanganFilterType !== 'semua' && t.jenis !== state.keuanganFilterType) return false;
+        if (state.keuanganFilterCategory !== 'semua' && t.kategori_id !== state.keuanganFilterCategory) return false;
+        if (state.searchQuery) {
+          const q = state.searchQuery.toLowerCase();
+          const matchKet = (t.keterangan || '').toLowerCase().includes(q);
+          const matchKat = (t.kategori_nama || '').toLowerCase().includes(q);
+          if (!matchKet && !matchKat) return false;
+        }
+        return true;
+      });
+
+      return `
+        <!-- Header Halaman -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Buku Kas & Transaksi</h1>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">Catat pemasukan & pengeluaran lengkap dengan bukti foto kamera/galeri.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            ${perms.canManageFinance ? `
+              <button type="button" onclick="window.appActions.openModalKategori()"
+                class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 text-xs sm:text-sm font-bold rounded-full transition-all flex items-center gap-2">
+                <i data-lucide="tags" class="w-4 h-4 text-brand-500"></i>
+                <span>Kelola Kategori</span>
+              </button>
+              <button type="button" onclick="window.appActions.openModalTransaksi()"
+                class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold rounded-full shadow-brand transition-all flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Tambah Transaksi</span>
+              </button>
+            ` : `
+              <span class="px-3.5 py-2 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
+                Mode Pantau (${getRoleLabel(state.currentUser.role)})
+              </span>
+            `}
+          </div>
+        </div>
+
+        <!-- Bar Filter & Pencarian -->
+        <div class="bg-white rounded-3xl p-4 sm:p-5 border border-gray-100 shadow-soft mb-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div class="flex items-center gap-1.5 bg-canvas p-1 rounded-2xl border border-gray-100 overflow-x-auto">
+            ${[
+              { id: 'semua', label: 'Semua' },
+              { id: 'pemasukan', label: 'Pemasukan' },
+              { id: 'pengeluaran', label: 'Pengeluaran' }
+            ].map(tab => `
+              <button type="button" onclick="window.appActions.setKeuanganType('${tab.id}')"
+                class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${state.keuanganFilterType === tab.id ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-800'}">
+                ${tab.label}
+              </button>
+            `).join('')}
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <select onchange="window.appActions.setKeuanganCategory(this.value)"
+              class="px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-semibold text-gray-700 focus:outline-none focus:border-brand-500">
+              <option value="semua">Semua Kategori</option>
+              ${state.categories.map(c => `
+                <option value="${c.id}" ${state.keuanganFilterCategory === c.id ? 'selected' : ''}>${c.nama_kategori} (${c.jenis === 'pemasukan' ? 'Masuk' : 'Keluar'})</option>
+              `).join('')}
+            </select>
+          </div>
+        </div>
+
+        <!-- Daftar Transaksi -->
+        <div class="bg-white rounded-3xl border border-gray-100 shadow-soft overflow-hidden">
+          ${filtered.length === 0 ? `
+            <div class="p-12 text-center">
+              <div class="w-14 h-14 rounded-2xl bg-canvas text-gray-400 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="folder-open" class="w-7 h-7"></i>
+              </div>
+              <h3 class="text-base font-bold text-gray-900">Belum Ada Data Transaksi</h3>
+              <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">Silakan catat pemasukan atau pengeluaran baru menggunakan tombol di atas.</p>
+            </div>
+          ` : `
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-gray-100 text-[11px] font-bold uppercase tracking-wider text-gray-400 bg-canvas/60">
+                    <th class="py-3.5 px-5">Tanggal & Kategori</th>
+                    <th class="py-3.5 px-4">Keterangan</th>
+                    <th class="py-3.5 px-4">Bukti Foto</th>
+                    <th class="py-3.5 px-4 text-right">Nominal</th>
+                    <th class="py-3.5 px-5 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                  ${filtered.map(t => {
+                    const isMasuk = t.jenis === 'pemasukan';
+                    return `
+                      <tr class="hover:bg-canvas/50 transition-colors">
+                        <td class="py-4 px-5 whitespace-nowrap">
+                          <div class="font-bold text-gray-900 text-xs">${formatTanggal(t.tanggal)}</div>
+                          <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${isMasuk ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">
+                            ${t.kategori_nama}
+                          </span>
+                        </td>
+                        <td class="py-4 px-4 min-w-[200px]">
+                          <p class="font-semibold text-gray-800 text-xs sm:text-sm">${t.keterangan}</p>
+                          <p class="text-[11px] text-gray-400 mt-0.5">Oleh: ${t.dibuat_oleh || 'Pengurus'}</p>
+                        </td>
+                        <td class="py-4 px-4 whitespace-nowrap">
+                          ${t.bukti_foto ? `
+                            <button type="button" onclick="window.appActions.previewBuktiFoto('${t.id}')"
+                              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-50 text-brand-600 hover:bg-brand-100 text-xs font-bold transition-colors">
+                              <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                              <span>Lihat Foto</span>
+                            </button>
+                          ` : `<span class="text-xs text-gray-400 italic">Tanpa foto</span>`}
+                        </td>
+                        <td class="py-4 px-4 text-right whitespace-nowrap font-extrabold tabular-nums ${isMasuk ? 'text-emerald-600' : 'text-rose-600'}">
+                          ${isMasuk ? '+' : '-'} ${formatRupiah(t.nominal)}
+                        </td>
+                        <td class="py-4 px-5 text-right whitespace-nowrap">
+                          ${perms.canManageFinance ? `
+                            <div class="inline-flex items-center gap-1.5">
+                              <button type="button" onclick="window.appActions.openModalTransaksi('${t.id}')" title="Edit Transaksi"
+                                class="p-2 rounded-xl text-gray-500 hover:text-brand-600 hover:bg-brand-50 transition-colors">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                              </button>
+                              <button type="button" onclick="window.appActions.confirmDeleteTransaction('${t.id}')" title="Hapus Transaksi"
+                                class="p-2 rounded-xl text-gray-500 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                              </button>
+                            </div>
+                          ` : `<span class="text-xs text-gray-400">-</span>`}
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    function renderLaporanTab() {
+      const list = getFilteredReportTransactions();
+      const perms = getPermissions(state.currentUser.role);
+      const sigNames = getSignatureNames();
+
+      let totalMasuk = 0;
+      let totalKeluar = 0;
+      list.forEach(t => {
+        if (t.jenis === 'pemasukan') totalMasuk += Number(t.nominal) || 0;
+        else totalKeluar += Number(t.nominal) || 0;
+      });
+      const selisihPeriode = totalMasuk - totalKeluar;
+
+      let runningBalance = 0;
+
+      return `
+        <!-- Header Halaman -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Laporan Keuangan Resmi</h1>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">Filter berdasarkan tanggal atau keseluruhan, siap unduh Excel & PDF bertanda tangan DKM.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            ${perms.canEditMasjidProfile ? `
+              <button type="button" onclick="window.appActions.openModalPenandatangan()"
+                class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 text-xs sm:text-sm font-bold rounded-full transition-all flex items-center gap-2">
+                <i data-lucide="pen-tool" class="w-4 h-4 text-brand-500"></i>
+                <span>Edit Nama TTD</span>
+              </button>
+            ` : ''}
+            <button type="button" onclick="window.appActions.exportExcel()"
+              class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-full shadow-sm transition-all flex items-center gap-2">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+              <span>Unduh Excel</span>
+            </button>
+            <button type="button" onclick="window.appActions.exportPDF()"
+              class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold rounded-full shadow-brand transition-all flex items-center gap-2">
+              <i data-lucide="file-text" class="w-4 h-4"></i>
+              <span>Unduh PDF Resmi</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel Filter Periode Laporan -->
+        <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div class="flex items-center gap-2 bg-canvas p-1.5 rounded-2xl border border-gray-100 w-fit">
+            <button type="button" onclick="window.appActions.setLaporanMode('rentang')"
+              class="px-4 py-2 rounded-xl text-xs font-bold transition-all ${state.laporanMode === 'rentang' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500'}">
+              Berdasarkan Tanggal
+            </button>
+            <button type="button" onclick="window.appActions.setLaporanMode('keseluruhan')"
+              class="px-4 py-2 rounded-xl text-xs font-bold transition-all ${state.laporanMode === 'keseluruhan' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500'}">
+              Keseluruhan Data
+            </button>
+          </div>
+
+          ${state.laporanMode === 'rentang' ? `
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-semibold text-gray-500">Dari:</label>
+                <input type="date" value="${state.laporanStartDate}" onchange="window.appActions.setLaporanDates('start', this.value)"
+                  class="px-3.5 py-2 bg-canvas border border-gray-200 rounded-xl text-xs font-bold text-gray-800" />
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-semibold text-gray-500">Sampai:</label>
+                <input type="date" value="${state.laporanEndDate}" onchange="window.appActions.setLaporanDates('end', this.value)"
+                  class="px-3.5 py-2 bg-canvas border border-gray-200 rounded-xl text-xs font-bold text-gray-800" />
+              </div>
+            </div>
+          ` : `
+            <span class="text-xs font-semibold text-brand-600 bg-brand-50 px-3.5 py-2 rounded-xl">
+              Menampilkan seluruh riwayat transaksi dari awal pencatatan
+            </span>
+          `}
+        </div>
+
+        <!-- Area Dokumen Laporan Resmi (Target Ekspor PDF) -->
+        <div id="printable-report-area" class="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-soft">
+          <!-- Kop Surat Resmi Masjid -->
+          <div class="border-b-2 border-gray-900 pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-2xl bg-brand-500 text-white flex items-center justify-center shrink-0">
+                <i data-lucide="landmark" class="w-8 h-8"></i>
+              </div>
+              <div>
+                <p class="text-[11px] font-bold uppercase tracking-widest text-brand-600">Dewan Kemakmuran Masjid (DKM)</p>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900 uppercase">${state.settings.nama_masjid}</h2>
+                <p class="text-xs text-gray-600 mt-0.5">${state.settings.alamat_masjid}</p>
+              </div>
+            </div>
+            <div class="sm:text-right">
+              <span class="inline-block px-3 py-1 rounded-lg bg-gray-900 text-white text-xs font-bold uppercase tracking-wider">
+                Laporan Kas Keuangan
+              </span>
+              <p class="text-xs font-semibold text-gray-600 mt-1.5">
+                Periode: ${state.laporanMode === 'keseluruhan' ? 'Keseluruhan Waktu' : `${formatTanggal(state.laporanStartDate)} s/d ${formatTanggal(state.laporanEndDate)}`}
+              </p>
+            </div>
+          </div>
+
+          <!-- Ringkasan Angka Laporan -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100">
+              <span class="text-xs font-semibold text-emerald-700">Total Pemasukan</span>
+              <p class="text-lg sm:text-xl font-extrabold text-emerald-800 tabular-nums mt-1">${formatRupiah(totalMasuk)}</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-rose-50/70 border border-rose-100">
+              <span class="text-xs font-semibold text-rose-700">Total Pengeluaran</span>
+              <p class="text-lg sm:text-xl font-extrabold text-rose-800 tabular-nums mt-1">${formatRupiah(totalKeluar)}</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-brand-50 border border-brand-100">
+              <span class="text-xs font-semibold text-brand-700">Surplus / Saldo Akhir Periode</span>
+              <p class="text-lg sm:text-xl font-extrabold text-brand-800 tabular-nums mt-1">${formatRupiah(selisihPeriode)}</p>
+            </div>
+          </div>
+
+          <!-- Tabel Rincian Laporan -->
+          <div class="overflow-x-auto mb-8">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-gray-900 text-white">
+                  <th class="py-3 px-3 rounded-tl-xl">No</th>
+                  <th class="py-3 px-3">Tanggal</th>
+                  <th class="py-3 px-3">Kategori</th>
+                  <th class="py-3 px-3">Uraian Transaksi</th>
+                  <th class="py-3 px-3 text-right">Masuk</th>
+                  <th class="py-3 px-3 text-right">Keluar</th>
+                  <th class="py-3 px-3 text-right rounded-tr-xl">Saldo</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 border-b border-gray-300">
+                ${list.length === 0 ? `
+                  <tr>
+                    <td colspan="7" class="py-8 text-center text-gray-400">Tidak ada data transaksi pada rentang laporan ini.</td>
+                  </tr>
+                ` : list.map((t, idx) => {
+                  const masuk = t.jenis === 'pemasukan' ? Number(t.nominal) : 0;
+                  const keluar = t.jenis === 'pengeluaran' ? Number(t.nominal) : 0;
+                  runningBalance += (masuk - keluar);
+                  return `
+                    <tr>
+                      <td class="py-2.5 px-3 font-medium text-gray-600">${idx + 1}</td>
+                      <td class="py-2.5 px-3 whitespace-nowrap font-semibold text-gray-800">${formatTanggal(t.tanggal)}</td>
+                      <td class="py-2.5 px-3 font-medium text-gray-700">${t.kategori_nama}</td>
+                      <td class="py-2.5 px-3 text-gray-800">
+                        ${t.keterangan}
+                        ${perms.canManageFinance ? `
+                          <button type="button" onclick="window.appActions.openModalTransaksi('${t.id}')" class="ml-1.5 text-[10px] text-brand-500 underline print:hidden">[Edit]</button>
+                        ` : ''}
+                      </td>
+                      <td class="py-2.5 px-3 text-right tabular-nums font-semibold text-emerald-700 whitespace-nowrap">${masuk > 0 ? formatRupiah(masuk) : '-'}</td>
+                      <td class="py-2.5 px-3 text-right tabular-nums font-semibold text-rose-700 whitespace-nowrap">${keluar > 0 ? formatRupiah(keluar) : '-'}</td>
+                      <td class="py-2.5 px-3 text-right tabular-nums font-bold text-gray-900 whitespace-nowrap">${formatRupiah(runningBalance)}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Kolom Pengesahan & Tanda Tangan Resmi DKM -->
+          <div class="pt-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+              <p class="text-[11px] text-gray-400 print:hidden">
+                * Sumber nama TTD diambil dari menu <b>Pengaturan → Pejabat Penandatangan</b>.
+              </p>
+              <p class="text-xs text-gray-600 text-right ml-auto">
+                ${state.settings.kota_masjid || 'Kota'}, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center text-xs">
+              <div>
+                <p class="font-semibold text-gray-600">Mengetahui,</p>
+                <p class="font-bold text-gray-900">Ketua DKM</p>
+                <div class="h-16"></div>
+                <p class="font-extrabold text-gray-900 underline">${sigNames.ketua || '___________________'}</p>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-600">Diperiksa Oleh,</p>
+                <p class="font-bold text-gray-900">Sekretaris DKM</p>
+                <div class="h-16"></div>
+                <p class="font-extrabold text-gray-900 underline">${sigNames.sekretaris || '___________________'}</p>
+              </div>
+              <div>
+                <p class="font-semibold text-gray-600">Dibuat Oleh,</p>
+                <p class="font-bold text-gray-900">Bendahara DKM</p>
+                <div class="h-16"></div>
+                <p class="font-extrabold text-gray-900 underline">${sigNames.bendahara || '___________________'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPenggunaTab() {
+      const perms = getPermissions(state.currentUser.role);
+
+      return `
+        <!-- Header Halaman -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Manajemen Pengurus DKM</h1>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">Kelola akun akses untuk Bendahara, Ketua DKM, dan Sekretaris beserta foto profil & alamat.</p>
+          </div>
+          ${perms.canManageUsers ? `
+            <button type="button" onclick="window.appActions.openModalUser()"
+              class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold rounded-full shadow-brand transition-all flex items-center gap-2 w-fit">
+              <i data-lucide="user-plus" class="w-4 h-4"></i>
+              <span>Tambah Pengurus</span>
+            </button>
+          ` : ''}
+        </div>
+
+        ${state.users.length === 0 ? `
+          <div class="bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-soft">
+            <div class="w-14 h-14 rounded-2xl bg-brand-50 text-brand-500 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="users" class="w-7 h-7"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">Belum Ada Akun Pengurus DKM</h3>
+            <p class="text-xs text-gray-500 mt-1 max-w-md mx-auto">Tambahkan akun untuk Bendahara, Ketua DKM, dan Sekretaris agar masing-masing pengurus dapat login sesuai perannya.</p>
+          </div>
+        ` : `
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            ${state.users.map(u => `
+              <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-soft flex flex-col justify-between">
+                <div>
+                  <div class="flex items-start justify-between gap-3 mb-4">
+                    <div class="flex items-center gap-3.5">
+                      ${u.foto_profil
+                        ? `<img src="${u.foto_profil}" class="w-14 h-14 rounded-2xl object-cover border border-gray-200 shrink-0" />`
+                        : `<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white font-extrabold text-xl flex items-center justify-center shrink-0">${(u.nama || 'U').charAt(0).toUpperCase()}</div>`
+                      }
+                      <div>
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-50 text-brand-600 mb-1">
+                          ${getRoleLabel(u.role)}
+                        </span>
+                        <h3 class="text-base font-extrabold text-gray-900 leading-snug">${u.nama}</h3>
+                        <p class="text-xs font-semibold text-gray-500">${u.jabatan}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="space-y-2 pt-3 border-t border-gray-100 text-xs text-gray-600">
+                    <div class="flex items-start gap-2">
+                      <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 shrink-0 mt-0.5"></i>
+                      <span>${u.alamat || 'Alamat belum diisi'}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="at-sign" class="w-4 h-4 text-gray-400 shrink-0"></i>
+                      <span>Username Login: <strong class="text-gray-900">${u.username}</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                ${perms.canManageUsers ? `
+                  <div class="flex items-center justify-end gap-2 mt-5 pt-3 border-t border-gray-100">
+                    <button type="button" onclick="window.appActions.openModalUser('${u.id}')"
+                      class="px-3.5 py-1.5 rounded-xl bg-canvas hover:bg-brand-50 text-gray-700 hover:text-brand-600 text-xs font-bold transition-colors flex items-center gap-1.5">
+                      <i data-lucide="pencil" class="w-3.5 h-3.5"></i> Edit
+                    </button>
+                    <button type="button" onclick="window.appActions.confirmDeleteUser('${u.id}')"
+                      class="px-3.5 py-1.5 rounded-xl bg-canvas hover:bg-rose-50 text-gray-700 hover:text-rose-600 text-xs font-bold transition-colors flex items-center gap-1.5">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Hapus
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `}
+      `;
+    }
+
+    function renderPengaturanTab() {
+      const perms = getPermissions(state.currentUser.role);
+
+      return `
+        <div class="mb-6">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900">Pengaturan & Pemeliharaan Data</h1>
+          <p class="text-xs sm:text-sm text-gray-500 mt-1">Atur identitas kop laporan masjid, cadangkan database (Backup), pulihkan (Restore), atau reset sistem.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Identitas Masjid & Penandatangan Laporan -->
+          <div class="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-7 border border-gray-100 shadow-soft">
+            <h3 class="text-base font-extrabold text-gray-900 mb-4 flex items-center gap-2">
+              <i data-lucide="building-2" class="w-5 h-5 text-brand-500"></i>
+              <span>Identitas Masjid & Kop Laporan</span>
+            </h3>
+            <form id="form-settings-masjid" class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1.5">Nama Masjid</label>
+                <input type="text" id="set-nama-masjid" value="${state.settings.nama_masjid || ''}" required
+                  class="w-full px-4 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-500" />
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-700 mb-1.5">Alamat Lengkap Masjid</label>
+                  <input type="text" id="set-alamat-masjid" value="${state.settings.alamat_masjid || ''}" required
+                    class="w-full px-4 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-500" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1.5">Kota (Tgl Laporan)</label>
+                  <input type="text" id="set-kota-masjid" value="${state.settings.kota_masjid || ''}" required
+                    class="w-full px-4 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-medium focus:outline-none focus:border-brand-500" />
+                </div>
+              </div>
+
+              <div class="pt-3 border-t border-gray-100">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                  <div>
+                    <p class="text-xs font-bold text-gray-800 uppercase tracking-wider">Pengaturan Nama Pejabat Penandatangan PDF</p>
+                    <p class="text-[11px] text-gray-500">Nama di bawah ini dicetak pada bagian tanda tangan Laporan PDF. Bisa diisi manual atau disinkronkan dari data pengurus.</p>
+                  </div>
+                  ${perms.canEditMasjidProfile ? `
+                    <button type="button" onclick="window.appActions.syncSignaturesFromUsers()"
+                      class="px-3 py-1.5 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-600 text-[11px] font-bold transition-colors inline-flex items-center gap-1.5 shrink-0 w-fit">
+                      <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                      <span>Ambil dari Data Pengurus</span>
+                    </button>
+                  ` : ''}
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Ketua DKM (Mengetahui)</label>
+                    <input type="text" id="set-nama-ketua" value="${state.settings.nama_ketua || ''}" placeholder="Nama & Gelar Ketua DKM"
+                      class="w-full px-3.5 py-2 bg-canvas border border-gray-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Sekretaris DKM (Diperiksa)</label>
+                    <input type="text" id="set-nama-sekretaris" value="${state.settings.nama_sekretaris || ''}" placeholder="Nama & Gelar Sekretaris"
+                      class="w-full px-3.5 py-2 bg-canvas border border-gray-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Bendahara DKM (Dibuat)</label>
+                    <input type="text" id="set-nama-bendahara" value="${state.settings.nama_bendahara || ''}" placeholder="Nama & Gelar Bendahara"
+                      class="w-full px-3.5 py-2 bg-canvas border border-gray-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500" />
+                  </div>
+                </div>
+              </div>
+
+              ${perms.canEditMasjidProfile ? `
+                <div class="pt-2">
+                  <button type="submit" class="px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white text-xs sm:text-sm font-bold rounded-full shadow-brand transition-all">
+                    Simpan Pengaturan Masjid
+                  </button>
+                </div>
+              ` : ''}
+            </form>
+          </div>
+
+          <!-- Panel Backup, Restore & Reset Total Data -->
+          <div class="lg:col-span-5 space-y-4">
+            <!-- Backup Data -->
+            <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-soft">
+              <div class="flex items-start gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                  <i data-lucide="download-cloud" class="w-6 h-6"></i>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-sm font-extrabold text-gray-900">Backup Seluruh Database</h4>
+                  <p class="text-xs text-gray-500 mt-1 leading-relaxed">Unduh salinan cadangan seluruh transaksi, kategori, profil pengurus, dan pengaturan masjid dalam format <code class="text-brand-600 font-bold">.json</code>.</p>
+                  <button type="button" onclick="window.appActions.backupJSON()"
+                    class="mt-3.5 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded-full transition-all inline-flex items-center gap-2">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span>Unduh File Backup (.JSON)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Restore Data -->
+            <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-soft">
+              <div class="flex items-start gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                  <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-sm font-extrabold text-gray-900">Restore Data dari Backup</h4>
+                  <p class="text-xs text-gray-500 mt-1 leading-relaxed">Pulihkan kembali seluruh catatan keuangan dan pengurus dari file <code class="font-bold">.json</code> yang pernah dicadangkan.</p>
+                  <label class="mt-3.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-full transition-all inline-flex items-center gap-2 cursor-pointer">
+                    <i data-lucide="folder-up" class="w-3.5 h-3.5"></i>
+                    <span>Pilih File Backup (.JSON)</span>
+                    <input type="file" accept=".json" onchange="window.appActions.restoreJSON(this.files[0])" class="hidden" />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Zona Berbahaya: Hapus Total Data -->
+            ${perms.canAccessSystemReset ? `
+              <div class="bg-rose-50/70 rounded-3xl p-6 border border-rose-200">
+                <div class="flex items-start gap-3.5">
+                  <div class="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="text-sm font-extrabold text-rose-900">Hapus Total Data (Reset Sistem)</h4>
+                    <p class="text-xs text-rose-700 mt-1 leading-relaxed">Menghapus permanen seluruh riwayat transaksi, kategori, dan daftar pengurus DKM. Pastikan Anda sudah melakukan Backup terlebih dahulu.</p>
+                    <button type="button" onclick="window.appActions.confirmResetTotal()"
+                      class="mt-3.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-full transition-all inline-flex items-center gap-2">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      <span>Hapus Semua Data</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 15. MODAL FORM INTERAKTIF (TRANSAKSI + KAMERA HP, KATEGORI, USER, KONFIRMASI)
+    // =========================================================================
+    let tempPhotoBase64 = '';
+
+    function renderModalTransaksi(editId = null) {
+      const trx = editId ? state.transactions.find(t => t.id === editId) : null;
+      tempPhotoBase64 = trx ? (trx.bukti_foto || '') : '';
+
+      const defaultJenis = trx ? trx.jenis : 'pemasukan';
+      const defaultTanggal = trx ? trx.tanggal : new Date().toISOString().split('T')[0];
+
+      openModal(`
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-extrabold text-gray-900">${trx ? 'Edit Transaksi Keuangan' : 'Catat Transaksi Baru'}</h3>
+            <p class="text-xs text-gray-500">Lengkapi nominal, kategori, dan foto bukti dokumentasi (opsional).</p>
+          </div>
+          <button type="button" onclick="window.appActions.closeModal()" class="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <form id="form-modal-transaksi" class="p-6 space-y-4">
+          <input type="hidden" id="trx-edit-id" value="${editId || ''}" />
+
+          <!-- Pilihan Jenis Transaksi -->
+          <div class="grid grid-cols-2 gap-2 p-1.5 bg-canvas rounded-2xl border border-gray-100">
+            <label class="cursor-pointer">
+              <input type="radio" name="trx-jenis" value="pemasukan" ${defaultJenis === 'pemasukan' ? 'checked' : ''} onchange="window.appActions.filterCategoryOptions(this.value)" class="peer hidden" />
+              <div class="py-2.5 text-center rounded-xl text-xs font-bold text-gray-500 peer-checked:bg-emerald-600 peer-checked:text-white transition-all">
+                + Pemasukan Kas
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="trx-jenis" value="pengeluaran" ${defaultJenis === 'pengeluaran' ? 'checked' : ''} onchange="window.appActions.filterCategoryOptions(this.value)" class="peer hidden" />
+              <div class="py-2.5 text-center rounded-xl text-xs font-bold text-gray-500 peer-checked:bg-rose-600 peer-checked:text-white transition-all">
+                - Pengeluaran Kas
+              </div>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1.5">Tanggal Transaksi</label>
+              <input type="date" id="trx-tanggal" value="${defaultTanggal}" required
+                class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-semibold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1.5">Nominal (Rp)</label>
+              <input type="number" id="trx-nominal" value="${trx ? trx.nominal : ''}" placeholder="Contoh: 500000" min="1" required
+                class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-extrabold tabular-nums" />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold text-gray-700">Kategori Transaksi</label>
+              <button type="button" onclick="window.appActions.openModalKategori()" class="text-[11px] font-bold text-brand-500 hover:underline">+ Edit / Tambah Kategori</button>
+            </div>
+            <select id="trx-kategori" required class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-semibold">
+              ${buildCategoryOptionsHTML(defaultJenis, trx ? trx.kategori_id : '')}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1.5">Keterangan / Uraian Transaksi</label>
+            <input type="text" id="trx-keterangan" value="${trx ? trx.keterangan : ''}" placeholder="Contoh: Infaq kotak amal Jumat / Pembelian perlengkapan" required
+              class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-medium" />
+          </div>
+
+          <!-- Upload Bukti Transaksi (Kamera HP atau Galeri) -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1.5">Bukti Transaksi / Dokumentasi (Opsional)</label>
+            <div class="grid grid-cols-2 gap-2.5">
+              <label class="flex items-center justify-center gap-2 py-2.5 px-3 bg-brand-50 hover:bg-brand-100 text-brand-600 rounded-2xl text-xs font-bold cursor-pointer border border-brand-100 transition-colors">
+                <i data-lucide="camera" class="w-4 h-4"></i>
+                <span>Kamera HP</span>
+                <input type="file" accept="image/*" capture="environment" onchange="window.appActions.handlePhotoUpload(this.files[0], 'trx-photo-preview')" class="hidden" />
+              </label>
+              <label class="flex items-center justify-center gap-2 py-2.5 px-3 bg-canvas hover:bg-gray-100 text-gray-700 rounded-2xl text-xs font-bold cursor-pointer border border-gray-200 transition-colors">
+                <i data-lucide="image" class="w-4 h-4"></i>
+                <span>Pilih Galeri</span>
+                <input type="file" accept="image/*" onchange="window.appActions.handlePhotoUpload(this.files[0], 'trx-photo-preview')" class="hidden" />
+              </label>
+            </div>
+
+            <div id="trx-photo-preview" class="mt-3 ${tempPhotoBase64 ? '' : 'hidden'}">
+              <div class="relative rounded-2xl overflow-hidden border border-gray-200 bg-canvas">
+                <img src="${tempPhotoBase64}" class="w-full max-h-48 object-contain mx-auto" />
+                <button type="button" onclick="window.appActions.clearTempPhoto('trx-photo-preview')"
+                  class="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-rose-600 text-white text-[11px] font-bold shadow">
+                  Hapus Foto
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 flex items-center justify-end gap-2.5 border-t border-gray-100">
+            <button type="button" onclick="window.appActions.closeModal()" class="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 hover:bg-gray-100">
+              Batal
+            </button>
+            <button type="submit" class="px-6 py-2.5 rounded-full bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold shadow-brand">
+              ${trx ? 'Simpan Perubahan' : 'Simpan Transaksi'}
+            </button>
+          </div>
+        </form>
+      `);
+
+      document.getElementById('form-modal-transaksi').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const jenis = document.querySelector('input[name="trx-jenis"]:checked').value;
+        const tanggal = document.getElementById('trx-tanggal').value;
+        const nominal = Number(document.getElementById('trx-nominal').value);
+        const catSelect = document.getElementById('trx-kategori');
+        const kategori_id = catSelect.value;
+        const kategori_nama = catSelect.options[catSelect.selectedIndex]?.text || 'Umum';
+        const keterangan = document.getElementById('trx-keterangan').value.trim();
+        const idToEdit = document.getElementById('trx-edit-id').value || null;
+
+        saveTransaction({
+          jenis,
+          tanggal,
+          nominal,
+          kategori_id,
+          kategori_nama,
+          keterangan,
+          bukti_foto: tempPhotoBase64
+        }, idToEdit);
+      });
+    }
+
+    function buildCategoryOptionsHTML(jenis, selectedId = '') {
+      const filtered = state.categories.filter(c => c.jenis === jenis);
+      if (filtered.length === 0) {
+        return `<option value="umum">Umum (${jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'})</option>`;
+      }
+      return filtered.map(c => `
+        <option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${c.nama_kategori}</option>
+      `).join('');
+    }
+
+    function renderModalKategori() {
+      openModal(`
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-extrabold text-gray-900">Manajemen Kategori Keuangan</h3>
+            <p class="text-xs text-gray-500">Tambah, ubah, atau hapus kategori pemasukan & pengeluaran masjid.</p>
+          </div>
+          <button type="button" onclick="window.appActions.closeModal()" class="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-5">
+          <form id="form-tambah-kategori" class="flex flex-col sm:flex-row gap-2">
+            <select id="cat-jenis-input" class="px-3 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-bold">
+              <option value="pemasukan">Pemasukan</option>
+              <option value="pengeluaran">Pengeluaran</option>
+            </select>
+            <input type="text" id="cat-nama-input" placeholder="Nama kategori baru..." required
+              class="flex-1 px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-medium" />
+            <button type="submit" class="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold rounded-2xl shrink-0">
+              + Tambah
+            </button>
+          </form>
+
+          <div class="max-h-64 overflow-y-auto space-y-2 pr-1">
+            ${state.categories.length === 0 ? `
+              <p class="text-center text-xs text-gray-400 py-6">Belum ada kategori khusus. Tambahkan di atas.</p>
+            ` : state.categories.map(c => `
+              <div class="flex items-center justify-between gap-2 p-3 rounded-2xl bg-canvas border border-gray-100">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${c.jenis === 'pemasukan' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                    ${c.jenis === 'pemasukan' ? 'Masuk' : 'Keluar'}
+                  </span>
+                  <span class="text-xs font-bold text-gray-800 truncate">${c.nama_kategori}</span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <button type="button" onclick="window.appActions.promptEditCategory('${c.id}')" class="p-1.5 text-gray-500 hover:text-brand-600 rounded-lg">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button type="button" onclick="window.appActions.deleteCategory('${c.id}')" class="p-1.5 text-gray-500 hover:text-rose-600 rounded-lg">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `);
+
+      document.getElementById('form-tambah-kategori').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const jenis = document.getElementById('cat-jenis-input').value;
+        const nama_kategori = document.getElementById('cat-nama-input').value.trim();
+        if (!nama_kategori) return;
+        saveCategory({ nama_kategori, jenis, warna_badge: jenis === 'pemasukan' ? 'emerald' : 'rose' });
+      });
+    }
+
+    function renderModalEditSingleCategory(catId) {
+      const cat = state.categories.find(c => c.id === catId);
+      if (!cat) return;
+      openModal(`
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+          <h3 class="text-base font-extrabold text-gray-900">Edit Kategori</h3>
+          <button type="button" onclick="window.appActions.openModalKategori()" class="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <form id="form-edit-single-cat" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Jenis Arus Dana</label>
+            <select id="edit-cat-jenis" class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-bold">
+              <option value="pemasukan" ${cat.jenis === 'pemasukan' ? 'selected' : ''}>Pemasukan</option>
+              <option value="pengeluaran" ${cat.jenis === 'pengeluaran' ? 'selected' : ''}>Pengeluaran</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Nama Kategori</label>
+            <input type="text" id="edit-cat-nama" value="${cat.nama_kategori}" required
+              class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-semibold" />
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" onclick="window.appActions.openModalKategori()" class="px-4 py-2 rounded-full text-xs font-bold text-gray-600">Batal</button>
+            <button type="submit" class="px-5 py-2 rounded-full bg-brand-500 text-white text-xs font-bold">Simpan Perubahan</button>
+          </div>
+        </form>
+      `, 'max-w-md');
+
+      document.getElementById('form-edit-single-cat').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const jenis = document.getElementById('edit-cat-jenis').value;
+        const nama_kategori = document.getElementById('edit-cat-nama').value.trim();
+        saveCategory({ nama_kategori, jenis, warna_badge: jenis === 'pemasukan' ? 'emerald' : 'rose' }, catId);
+      });
+    }
+
+    function renderModalUser(editId = null) {
+      const usr = editId ? state.users.find(u => u.id === editId) : null;
+      tempPhotoBase64 = usr ? (usr.foto_profil || '') : '';
+
+      openModal(`
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-extrabold text-gray-900">${usr ? 'Edit Data Pengurus DKM' : 'Tambah Pengurus DKM Baru'}</h3>
+            <p class="text-xs text-gray-500">Lengkapi profil, jabatan, alamat, dan role akses aplikasi.</p>
+          </div>
+          <button type="button" onclick="window.appActions.closeModal()" class="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <form id="form-modal-user" class="p-6 space-y-4">
+          <input type="hidden" id="usr-edit-id" value="${editId || ''}" />
+
+          <!-- Foto Profil Pengurus -->
+          <div class="flex items-center gap-4">
+            <div id="usr-photo-preview" class="w-16 h-16 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center overflow-hidden shrink-0">
+              ${tempPhotoBase64
+                ? `<img src="${tempPhotoBase64}" class="w-full h-full object-cover" />`
+                : `<i data-lucide="user" class="w-7 h-7 text-brand-400"></i>`
+              }
+            </div>
+            <div class="space-y-1.5">
+              <p class="text-xs font-bold text-gray-800">Foto Profil Pengurus (Opsional)</p>
+              <div class="flex flex-wrap gap-2">
+                <label class="px-3 py-1.5 rounded-xl bg-brand-50 text-brand-600 text-xs font-bold cursor-pointer hover:bg-brand-100">
+                  Kamera HP
+                  <input type="file" accept="image/*" capture="user" onchange="window.appActions.handleUserPhotoUpload(this.files[0])" class="hidden" />
+                </label>
+                <label class="px-3 py-1.5 rounded-xl bg-canvas border border-gray-200 text-gray-700 text-xs font-bold cursor-pointer hover:bg-gray-100">
+                  Galeri
+                  <input type="file" accept="image/*" onchange="window.appActions.handleUserPhotoUpload(this.files[0])" class="hidden" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap & Gelar</label>
+              <input type="text" id="usr-nama" value="${usr ? usr.nama : ''}" placeholder="Contoh: H. Ahmad Fauzi" required
+                class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-semibold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Role Hak Akses</label>
+              <select id="usr-role" required class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-bold">
+                <option value="bendahara" ${usr?.role === 'bendahara' ? 'selected' : ''}>Bendahara DKM (Input & Edit Keuangan)</option>
+                <option value="ketua_dkm" ${usr?.role === 'ketua_dkm' ? 'selected' : ''}>Ketua DKM (Pengawasan & Laporan)</option>
+                <option value="sekretaris" ${usr?.role === 'sekretaris' ? 'selected' : ''}>Sekretaris DKM (Administrasi & Laporan)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Jabatan Struktur DKM</label>
+            <input type="text" id="usr-jabatan" value="${usr ? usr.jabatan : ''}" placeholder="Contoh: Bendahara I / Ketua Bidang Imarah" required
+              class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-semibold" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Alamat Domisili</label>
+            <input type="text" id="usr-alamat" value="${usr ? usr.alamat : ''}" placeholder="Alamat lengkap pengurus..." required
+              class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-medium" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Username Login</label>
+              <input type="text" id="usr-username" value="${usr ? usr.username : ''}" placeholder="tanpa spasi" required
+                class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Password Login</label>
+              <div class="relative">
+                <input type="password" id="usr-password" value="${usr ? usr.password : ''}" placeholder="Minimal 4 karakter" required
+                  class="w-full pl-3.5 pr-10 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-xs font-bold" />
+                <button type="button" onclick="window.appActions.togglePasswordVisibility('usr-password', this)"
+                  title="Tampilkan / Sembunyikan Password"
+                  class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg text-gray-400 hover:text-brand-600">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 flex items-center justify-end gap-2 border-t border-gray-100">
+            <button type="button" onclick="window.appActions.closeModal()" class="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 hover:bg-gray-100">Batal</button>
+            <button type="submit" class="px-6 py-2.5 rounded-full bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold shadow-brand">
+              ${usr ? 'Simpan Perubahan' : 'Daftarkan Pengurus'}
+            </button>
+          </div>
+        </form>
+      `);
+
+      document.getElementById('form-modal-user').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const idToEdit = document.getElementById('usr-edit-id').value || null;
+        saveUser({
+          nama: document.getElementById('usr-nama').value.trim(),
+          role: document.getElementById('usr-role').value,
+          jabatan: document.getElementById('usr-jabatan').value.trim(),
+          alamat: document.getElementById('usr-alamat').value.trim(),
+          username: document.getElementById('usr-username').value.trim(),
+          password: document.getElementById('usr-password').value,
+          foto_profil: tempPhotoBase64
+        }, idToEdit);
+      });
+    }
+
+    function renderModalPenandatangan() {
+      const sig = getSignatureNames();
+      const ketuaList = state.users.filter(u => u.role === 'ketua_dkm');
+      const sekretarisList = state.users.filter(u => u.role === 'sekretaris');
+      const bendaharaList = state.users.filter(u => u.role === 'bendahara');
+
+      openModal(`
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-extrabold text-gray-900">Atur Nama Pejabat Penandatangan</h3>
+            <p class="text-xs text-gray-500">Pastikan nama & gelar resmi Ketua DKM, Sekretaris, dan Bendahara sudah benar sebelum cetak PDF.</p>
+          </div>
+          <button type="button" onclick="window.appActions.closeModal()" class="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <form id="form-modal-penandatangan" class="p-6 space-y-4">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-gray-700">Ketua DKM (Mengetahui)</label>
+              ${ketuaList.length > 0 ? `<button type="button" onclick="document.getElementById('modal-ttd-ketua').value='${ketuaList[0].nama.replace(/'/g, "\\'")}'" class="text-[11px] font-bold text-brand-500 hover:underline">Isi dari akun: ${ketuaList[0].nama}</button>` : ''}
+            </div>
+            <input type="text" id="modal-ttd-ketua" value="${sig.ketua}" placeholder="Contoh: H. Ahmad Fauzi, M.Ag" required
+              class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-brand-500" />
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-gray-700">Sekretaris DKM (Diperiksa Oleh)</label>
+              ${sekretarisList.length > 0 ? `<button type="button" onclick="document.getElementById('modal-ttd-sekretaris').value='${sekretarisList[0].nama.replace(/'/g, "\\'")}'" class="text-[11px] font-bold text-brand-500 hover:underline">Isi dari akun: ${sekretarisList[0].nama}</button>` : ''}
+            </div>
+            <input type="text" id="modal-ttd-sekretaris" value="${sig.sekretaris}" placeholder="Contoh: Ust. Muhammad Ridwan" required
+              class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-brand-500" />
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-gray-700">Bendahara DKM (Dibuat Oleh)</label>
+              ${bendaharaList.length > 0 ? `<button type="button" onclick="document.getElementById('modal-ttd-bendahara').value='${bendaharaList[0].nama.replace(/'/g, "\\'")}'" class="text-[11px] font-bold text-brand-500 hover:underline">Isi dari akun: ${bendaharaList[0].nama}</button>` : ''}
+            </div>
+            <input type="text" id="modal-ttd-bendahara" value="${sig.bendahara}" placeholder="Contoh: Ir. Budi Santoso" required
+              class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-brand-500" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Kota Penerbitan Laporan</label>
+            <input type="text" id="modal-ttd-kota" value="${state.settings.kota_masjid || ''}" placeholder="Contoh: Jakarta" required
+              class="w-full px-3.5 py-2.5 bg-canvas border border-gray-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-brand-500" />
+          </div>
+
+          <div class="pt-3 flex items-center justify-end gap-2 border-t border-gray-100">
+            <button type="button" onclick="window.appActions.closeModal()" class="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 hover:bg-gray-100">Batal</button>
+            <button type="submit" class="px-6 py-2.5 rounded-full bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold shadow-brand">
+              Simpan Nama Tanda Tangan
+            </button>
+          </div>
+        </form>
+      `, 'max-w-md');
+
+      document.getElementById('form-modal-penandatangan').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await saveSettings({
+          nama_ketua: document.getElementById('modal-ttd-ketua').value.trim(),
+          nama_sekretaris: document.getElementById('modal-ttd-sekretaris').value.trim(),
+          nama_bendahara: document.getElementById('modal-ttd-bendahara').value.trim(),
+          kota_masjid: document.getElementById('modal-ttd-kota').value.trim()
+        });
+        closeModal();
+      });
+    }
+
+    // =========================================================================
+    // 16. GLOBAL ACTIONS EXPOSED TO INLINE HANDLERS
+    // =========================================================================
+    window.appActions = {
+      openModalPenandatangan() {
+        renderModalPenandatangan();
+      },
+      syncSignaturesFromUsers() {
+        const ketua = state.users.find(u => u.role === 'ketua_dkm');
+        const sekretaris = state.users.find(u => u.role === 'sekretaris');
+        const bendahara = state.users.find(u => u.role === 'bendahara');
+
+        const inputKetua = document.getElementById('set-nama-ketua');
+        const inputSekretaris = document.getElementById('set-nama-sekretaris');
+        const inputBendahara = document.getElementById('set-nama-bendahara');
+
+        if (ketua && inputKetua) inputKetua.value = ketua.nama;
+        if (sekretaris && inputSekretaris) inputSekretaris.value = sekretaris.nama;
+        if (bendahara && inputBendahara) inputBendahara.value = bendahara.nama;
+
+        if (!ketua && !sekretaris && !bendahara) {
+          showToast('Belum ada akun pengurus di menu Pengurus DKM.', 'info');
+        } else {
+          showToast('Nama pejabat disinkronkan dari data pengurus. Klik Simpan Pengaturan untuk menyimpan.');
+        }
+      },
+      togglePasswordVisibility(inputId, btnEl) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        if (btnEl) {
+          btnEl.innerHTML = `<i data-lucide="${isHidden ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
+          if (window.lucide) lucide.createIcons();
+        }
+      },
+      switchTab(tab) {
+        state.activeTab = tab;
+        renderApp();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+      setSearch(val) {
+        state.searchQuery = val;
+        if (state.activeTab !== 'keuangan') state.activeTab = 'keuangan';
+        renderApp();
+      },
+      setKeuanganType(type) {
+        state.keuanganFilterType = type;
+        renderApp();
+      },
+      setKeuanganCategory(catId) {
+        state.keuanganFilterCategory = catId;
+        renderApp();
+      },
+      setLaporanMode(mode) {
+        state.laporanMode = mode;
+        renderApp();
+      },
+      setLaporanDates(which, val) {
+        if (which === 'start') state.laporanStartDate = val;
+        else state.laporanEndDate = val;
+        renderApp();
+      },
+      openModalTransaksi(editId = null) {
+        renderModalTransaksi(editId);
+      },
+      filterCategoryOptions(jenis) {
+        const select = document.getElementById('trx-kategori');
+        if (select) select.innerHTML = buildCategoryOptionsHTML(jenis);
+      },
+      async handlePhotoUpload(file, previewContainerId) {
+        if (!file) return;
+        try {
+          showToast('Memproses & mengompresi foto bukti...', 'info');
+          tempPhotoBase64 = await compressImageFile(file, 800, 0.72);
+          const container = document.getElementById(previewContainerId);
+          if (container) {
+            container.classList.remove('hidden');
+            container.querySelector('img').src = tempPhotoBase64;
+          }
+          showToast('Foto bukti siap dilampirkan.');
+        } catch (err) {
+          showToast('Gagal memproses foto.', 'error');
+        }
+      },
+      clearTempPhoto(previewContainerId) {
+        tempPhotoBase64 = '';
+        const container = document.getElementById(previewContainerId);
+        if (container) container.classList.add('hidden');
+      },
+      previewBuktiFoto(trxId) {
+        const trx = state.transactions.find(t => t.id === trxId);
+        if (!trx || !trx.bukti_foto) return;
+        openModal(`
+          <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-extrabold text-gray-900">Bukti Dokumentasi Transaksi</h3>
+              <p class="text-xs text-gray-500">${trx.keterangan} • ${formatTanggal(trx.tanggal)}</p>
+            </div>
+            <button type="button" onclick="window.appActions.closeModal()" class="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+          </div>
+          <div class="p-5 bg-canvas">
+            <img src="${trx.bukti_foto}" class="w-full max-h-[65vh] object-contain rounded-2xl mx-auto shadow-sm" />
+          </div>
+          <div class="p-4 bg-white flex items-center justify-between text-xs">
+            <span class="font-bold text-gray-700">Nominal: ${formatRupiah(trx.nominal)}</span>
+            <button type="button" onclick="window.appActions.closeModal()" class="px-5 py-2 rounded-full bg-gray-900 text-white font-bold">Tutup</button>
+          </div>
+        `, 'max-w-xl');
+      },
+      confirmDeleteTransaction(id) {
+        openModal(`
+          <div class="p-6 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="trash-2" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-gray-900">Hapus Catatan Transaksi?</h3>
+            <p class="text-xs text-gray-500 mt-1">Data transaksi yang dihapus akan otomatis memperbarui saldo kas masjid.</p>
+            <div class="flex items-center justify-center gap-2.5 mt-6">
+              <button type="button" onclick="window.appActions.closeModal()" class="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 bg-canvas">Batal</button>
+              <button type="button" onclick="window.appActions.executeDeleteTransaction('${id}')" class="px-5 py-2.5 rounded-full text-xs font-bold text-white bg-rose-600 hover:bg-rose-700">Ya, Hapus</button>
+            </div>
+          </div>
+        `, 'max-w-sm');
+      },
+      executeDeleteTransaction(id) {
+        deleteTransaction(id);
+      },
+      openModalKategori() {
+        renderModalKategori();
+      },
+      promptEditCategory(id) {
+        renderModalEditSingleCategory(id);
+      },
+      deleteCategory(id) {
+        deleteCategory(id);
+      },
+      openModalUser(editId = null) {
+        renderModalUser(editId);
+      },
+      async handleUserPhotoUpload(file) {
+        if (!file) return;
+        try {
+          tempPhotoBase64 = await compressImageFile(file, 400, 0.75);
+          const box = document.getElementById('usr-photo-preview');
+          if (box) box.innerHTML = `<img src="${tempPhotoBase64}" class="w-full h-full object-cover" />`;
+          showToast('Foto profil berhasil dimuat.');
+        } catch (err) {
+          showToast('Gagal memproses foto profil.', 'error');
+        }
+      },
+      confirmDeleteUser(id) {
+        openModal(`
+          <div class="p-6 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="user-x" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-gray-900">Hapus Akun Pengurus?</h3>
+            <p class="text-xs text-gray-500 mt-1">Pengurus tersebut tidak akan bisa login kembali ke sistem.</p>
+            <div class="flex items-center justify-center gap-2.5 mt-6">
+              <button type="button" onclick="window.appActions.closeModal()" class="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 bg-canvas">Batal</button>
+              <button type="button" onclick="window.appActions.executeDeleteUser('${id}')" class="px-5 py-2.5 rounded-full text-xs font-bold text-white bg-rose-600">Hapus Pengurus</button>
+            </div>
+          </div>
+        `, 'max-w-sm');
+      },
+      executeDeleteUser(id) {
+        deleteUser(id);
+      },
+      backupJSON() {
+        handleBackupJSON();
+      },
+      restoreJSON(file) {
+        handleRestoreJSON(file);
+      },
+      confirmResetTotal() {
+        openModal(`
+          <div class="p-6 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-gray-900">Konfirmasi Hapus Total Data</h3>
+            <p class="text-xs text-gray-500 mt-1">Tindakan ini akan mengosongkan seluruh transaksi, kategori, dan data pengurus. Lanjutkan?</p>
+            <div class="flex items-center justify-center gap-2.5 mt-6">
+              <button type="button" onclick="window.appActions.closeModal()" class="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 bg-canvas">Batal</button>
+              <button type="button" onclick="window.appActions.executeResetTotal()" class="px-5 py-2.5 rounded-full text-xs font-bold text-white bg-rose-600">Ya, Kosongkan Semua</button>
+            </div>
+          </div>
+        `, 'max-w-sm');
+      },
+      executeResetTotal() {
+        handleResetAllData();
+      },
+      exportExcel() {
+        exportReportToExcel();
+      },
+      exportPDF() {
+        exportReportToPDF();
+      },
+      closeModal() {
+        closeModal();
+      },
+      logout() {
+        handleLogout();
+      }
+    };
+
+    // =========================================================================
+    // 17. SHELL LAYOUT UTAMA (DESKTOP FIXED SIDEBAR + MOBILE FLOATING BOTTOM NAV)
+    // =========================================================================
+    function renderApp() {
+      const root = document.getElementById('app-root');
+
+      if (!state.currentUser) {
+        root.innerHTML = renderLoginView();
+        bindLoginEvents();
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      const menuItems = [
+        { id: 'dashboard', label: 'Dashboard', icon: 'layout-grid', section: 'MENU UTAMA' },
+        { id: 'keuangan', label: 'Keuangan', icon: 'wallet', section: 'MENU UTAMA' },
+        { id: 'laporan', label: 'Laporan', icon: 'file-bar-chart-2', section: 'MENU UTAMA' },
+        { id: 'pengguna', label: 'Pengurus', icon: 'users', section: 'ADMINISTRASI' },
+        { id: 'pengaturan', label: 'Pengaturan', icon: 'settings', section: 'ADMINISTRASI' }
+      ];
+
+      let activeContent = '';
+      if (state.activeTab === 'dashboard') activeContent = renderDashboardTab();
+      else if (state.activeTab === 'keuangan') activeContent = renderKeuanganTab();
+      else if (state.activeTab === 'laporan') activeContent = renderLaporanTab();
+      else if (state.activeTab === 'pengguna') activeContent = renderPenggunaTab();
+      else if (state.activeTab === 'pengaturan') activeContent = renderPengaturanTab();
+
+      root.innerHTML = `
+        <div class="min-h-screen flex bg-canvas">
+          <!-- DESKTOP FIXED SIDEBAR (Sembunyi di Mobile, Tampil di lg ke atas) -->
+          <aside class="hidden lg:flex flex-col w-64 bg-white border-r border-gray-100 fixed inset-y-0 left-0 z-30 justify-between py-6">
+            <div>
+              <!-- Logo Brand -->
+              <div class="px-6 mb-8 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-brand-500 text-white flex items-center justify-center shadow-brand">
+                  <i data-lucide="landmark" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <span class="text-lg font-extrabold tracking-tight text-gray-900 block leading-none">SIMASJID</span>
+                  <span class="text-[11px] font-semibold text-gray-400 mt-1 block truncate max-w-[140px]">${state.settings.nama_masjid}</span>
+                </div>
+              </div>
+
+              <!-- Menu Navigasi -->
+              <div class="space-y-6">
+                <div>
+                  <p class="px-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Menu Utama</p>
+                  <nav class="space-y-1">
+                    ${menuItems.filter(m => m.section === 'MENU UTAMA').map(item => `
+                      <button type="button" onclick="window.appActions.switchTab('${item.id}')"
+                        class="nav-item-desktop w-full flex items-center gap-3.5 px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-900 ${state.activeTab === item.id ? 'active' : ''}">
+                        <i data-lucide="${item.icon}" class="w-5 h-5"></i>
+                        <span>${item.label}</span>
+                      </button>
+                    `).join('')}
+                  </nav>
+                </div>
+
+                <div>
+                  <p class="px-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Administrasi</p>
+                  <nav class="space-y-1">
+                    ${menuItems.filter(m => m.section === 'ADMINISTRASI').map(item => `
+                      <button type="button" onclick="window.appActions.switchTab('${item.id}')"
+                        class="nav-item-desktop w-full flex items-center gap-3.5 px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-900 ${state.activeTab === item.id ? 'active' : ''}">
+                        <i data-lucide="${item.icon}" class="w-5 h-5"></i>
+                        <span>${item.label}</span>
+                      </button>
+                    `).join('')}
+                    <button type="button" onclick="window.appActions.logout()"
+                      class="w-full flex items-center gap-3.5 px-6 py-3 text-sm font-medium text-rose-500 hover:bg-rose-50/70 transition-colors">
+                      <i data-lucide="log-out" class="w-5 h-5"></i>
+                      <span>Keluar</span>
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kartu Status Mode di Bawah Sidebar -->
+            <div class="px-5">
+              <div class="rounded-3xl bg-gradient-to-br from-gray-900 to-brand-700 text-white p-4 relative overflow-hidden">
+                <span class="inline-block px-2 py-0.5 rounded-md bg-white/15 text-[10px] font-bold uppercase tracking-wider mb-1.5">
+                  ${IS_PREVIEW ? 'Mode Preview' : 'Live Firebase'}
+                </span>
+                <p class="text-xs font-bold leading-snug">${state.settings.nama_masjid}</p>
+                <p class="text-[11px] text-white/75 mt-0.5">Transparansi Kas Umat</p>
+              </div>
+            </div>
+          </aside>
+
+          <!-- AREA KONTEN UTAMA -->
+          <div class="flex-1 lg:pl-64 flex flex-col min-w-0 pb-32 lg:pb-10">
+            <!-- Top Header Bar (Search + Profil User) -->
+            <header class="sticky top-0 z-20 bg-canvas/90 backdrop-blur-md px-4 sm:px-8 py-4">
+              <div class="max-w-7xl mx-auto bg-white rounded-3xl px-4 sm:px-6 py-3 border border-gray-100 shadow-soft flex items-center justify-between gap-4">
+                <!-- Logo Mobile + Search Input -->
+                <div class="flex items-center gap-3 flex-1 max-w-md">
+                  <div class="lg:hidden w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center shrink-0">
+                    <i data-lucide="landmark" class="w-5 h-5"></i>
+                  </div>
+                  <div class="relative flex-1">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" value="${state.searchQuery}" oninput="window.appActions.setSearch(this.value)"
+                      placeholder="Cari transaksi atau kategori..."
+                      class="w-full pl-10 pr-4 py-2 bg-canvas rounded-full text-xs sm:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20" />
+                  </div>
+                </div>
+
+                <!-- Badge Preview & Profil Pengguna -->
+                <div class="flex items-center gap-3">
+                  ${IS_PREVIEW ? `
+                    <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-50 text-brand-600 text-xs font-bold">
+                      <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                      Preview Mode
+                    </span>
+                  ` : ''}
+
+                  <div class="flex items-center gap-2.5 pl-2 border-l border-gray-100">
+                    ${state.currentUser.foto_profil
+                      ? `<img src="${state.currentUser.foto_profil}" class="w-9 h-9 rounded-full object-cover border border-gray-200" />`
+                      : `<div class="w-9 h-9 rounded-full bg-brand-100 text-brand-600 font-extrabold text-sm flex items-center justify-center">${(state.currentUser.nama || 'A').charAt(0).toUpperCase()}</div>`
+                    }
+                    <div class="hidden sm:block text-left">
+                      <p class="text-xs font-extrabold text-gray-900 leading-tight">${state.currentUser.nama}</p>
+                      <p class="text-[11px] font-medium text-gray-400">${getRoleLabel(state.currentUser.role)}</p>
+                    </div>
+                    <button type="button" onclick="window.appActions.logout()" title="Keluar"
+                      class="lg:hidden p-2 rounded-full text-rose-500 hover:bg-rose-50">
+                      <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            <!-- Kontainer Konten Dinamis -->
+            <main class="flex-1 px-4 sm:px-8 pt-2">
+              <div class="max-w-7xl mx-auto">
+                ${activeContent}
+              </div>
+            </main>
+          </div>
+
+          <!-- MOBILE FLOATING BOTTOM NAVIGATION BAR (Tampil di HP, Sembunyi di Desktop) -->
+          <nav class="lg:hidden fixed bottom-3 inset-x-2.5 sm:inset-x-4 z-40 glass-nav rounded-3xl shadow-xl px-1.5 py-1.5 grid grid-cols-5 gap-1 items-center" style="padding-bottom: max(0.375rem, env(safe-area-inset-bottom));">
+            ${menuItems.map(item => {
+              const isActive = state.activeTab === item.id;
+              return `
+                <button type="button" onclick="window.appActions.switchTab('${item.id}')"
+                  class="flex flex-col items-center justify-center py-2 px-1 rounded-2xl transition-all min-w-0 ${isActive ? 'bg-brand-500 text-white shadow-brand' : 'text-gray-500 hover:text-gray-900'}">
+                  <i data-lucide="${item.icon}" class="w-4 h-4 shrink-0"></i>
+                  <span class="text-[10px] font-bold mt-1 truncate max-w-full leading-none">${item.label}</span>
+                </button>
+              `;
+            }).join('')}
+          </nav>
+        </div>
+      `;
+
+      bindTabEvents();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // =========================================================================
+    // 18. EVENT BINDERS
+    // =========================================================================
+    function bindLoginEvents() {
+      const formLogin = document.getElementById('form-unified-login');
+      if (!formLogin) return;
+
+      formLogin.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const identifier = document.getElementById('input-login-identifier').value;
+        const pass = document.getElementById('input-login-password').value;
+        handleUnifiedLogin(identifier, pass);
+      });
+    }
+
+    function bindTabEvents() {
+      const formSettings = document.getElementById('form-settings-masjid');
+      if (formSettings) {
+        formSettings.addEventListener('submit', (e) => {
+          e.preventDefault();
+          saveSettings({
+            nama_masjid: document.getElementById('set-nama-masjid').value.trim(),
+            alamat_masjid: document.getElementById('set-alamat-masjid').value.trim(),
+            kota_masjid: document.getElementById('set-kota-masjid').value.trim(),
+            nama_ketua: document.getElementById('set-nama-ketua').value.trim(),
+            nama_sekretaris: document.getElementById('set-nama-sekretaris').value.trim(),
+            nama_bendahara: document.getElementById('set-nama-bendahara').value.trim()
+          });
+        });
+      }
+    }
+
+    // Inisialisasi Awal
+    renderApp();
+  </script>
+</body>
+</html>
